@@ -7,14 +7,12 @@
 
 ## NOW (이번 세션 태스크 — 항상 1개)
 
-- [ ] **M1-2** 케플러 엔진 `src/sim/kepler.ts` (스펙 §3.1): solveKepler + propagate(planet, jd) → {posAU, trueAnomaly}
-  - DoD: §10 테스트 1(a값), 7(시민일), 8(칭동 위상 복귀) 통과
+- [ ] **M1-3** System View 기본: Star + Planet×3 + 궤도선, 카메라 컨트롤 (스펙 §7.2-7.3 스케일 전략)
+  - DoD: 렌더 확인 + 회합주기 자동 측정 테스트 (§10 테스트 3, 4: 8.60d / 6.04d)
 
 ## NEXT (위에서부터 순서대로 NOW로 승격)
 
 > 공통 규칙: **각 마일스톤 M{n}의 마지막 태스크에는 CLAUDE.md 'Git/배포 규약'의 dev→main 머지(=자동 배포)와 `gh run watch` 성공 확인까지 포함**된다.
-- [ ] **M1-3** System View 기본: Star + Planet×3 + 궤도선, 카메라 컨트롤 (스펙 §7.2-7.3 스케일 전략)
-  - DoD: 렌더 확인 + 회합주기 자동 측정 테스트 (§10 테스트 3, 4: 8.60d / 6.04d)
 - [ ] **M1-4** 첫 배포 (M1 마감): `npm run build` 로컬 확인 → CLAUDE.md 규약대로 dev→main 머지 → `gh run watch` 성공 → `https://<owner>.github.io/teegarden-sim/` 접속해 System View 확인 → URL을 README.md 최상단에 기록 후 dev에 커밋
   - DoD: 배포 링크에서 M1-3 화면이 보임
 - [ ] **M2-1** 시간 스토어+컨트롤러 (스펙 §3.2): simTimeJD, timeScale(1~1e6 로그), 재생/스크럽/이벤트 점프 버튼
@@ -45,13 +43,15 @@
 
 ## DONE
 
-- [x] **M1-1** 프로젝트 스캐폴드: Vite+React+TS + §7.1 스택 + vitest, 스펙 §2 → `src/data/teegarden.ts` 추출 생성, 상수 무결성 테스트 4개 통과 (2026-06-11)
+- [x] **M1-2** 케플러 엔진 `src/sim/kepler.ts`: solveKepler(NR, 1e-10) + propagate + librationOffsetRad. §10 테스트 1·7·8 통과 (2026-06-11)
+- [x] **M1-1** 프로젝트 스캐폴드: Vite+React+TS + §7.1 스택 + vitest, 스펙 §2 → `src/data/teegarden.ts` 추출 생성, 상수 무결성 테스트 4개 통과 (commit 342dc31, 2026-06-11)
 - [x] **M0-1** GitHub 저장소·브랜치·배포 골격: git init → 초기 커밋 → `Jinsoo-96/teegarden-sim` public 생성 → main/dev 푸시 (initial commit, 2026-06-11)
 
 ## DECISIONS (스펙에 없어서 내린 결정 — 1줄씩 누적)
 
 - `2026-06-11 M0-1: .gitignore에 files.zip 추가 — 이유: 원본 zip은 로컬 백업용, 내용물은 이미 저장소 경로에 배치됨`
 - `2026-06-11 M1-1: 최신 안정판 채택 — Vite 8 / React 19 / three 0.184(=r160+ 충족) / vitest 4. 타입 전용 @types/three 추가. §2 상수는 awk로 스펙 코드블록에서 기계 추출(수기 금지 규칙 준수)`
+- `2026-06-11 M1-2: meanLongitudeAtEpochDeg를 평균근점이각 M0로 사용(근점 경도 0 가정) — 스펙 §3.1 의사코드 M=M0+n·Δt를 그대로 따름. 연 길이는 율리우스년 365.25d`
 
 ## KNOWN ISSUES
 
@@ -59,8 +59,8 @@
 
 ## HANDOFF NOTE (마지막 세션이 덮어쓰는 인수인계 — 항상 최신 1개만)
 
-- 마지막 작업 파일/함수: `src/data/teegarden.ts`(스펙 §2 추출본) + `src/data/teegarden.test.ts`(상수 무결성)
-- 어디까지 했나: M1-1 완료 — Vite+React+TS 스캐폴드, §7.1 스택 전체 설치, `npm test`/`npm run build`/`npm run dev` 모두 정상
-- 다음 세션 첫 행동: M1-2 수행 — 스펙 §3.1 읽고 `src/sim/kepler.ts` 작성 (solveKepler 뉴턴-랩슨 1e-10 + propagate), §10 테스트 1(a값)·7(시민일)·8(칭동 위상 복귀) 작성
-- 주의사항/함정: 단위는 AU/day/M☉, G=4π²·AU³/(yr²·Msun) — yr↔day 환산 주의. 공면 가정(y-up, 황도면=xz). epoch 위상은 meanLongitudeAtEpochDeg 사용
-- 테스트 상태: 4 passed / 0 failed (teegarden.test.ts — 상수 무결성 4건)
+- 마지막 작업 파일/함수: `src/sim/kepler.ts` (solveKepler / propagate / librationOffsetRad / semiMajorAxisFromPeriod)
+- 어디까지 했나: M1-2 완료 — 케플러 엔진 + §10 테스트 1·7·8 전부 통과, 빌드 정상
+- 다음 세션 첫 행동: M1-3 수행 — 스펙 §7.2-7.3 읽고 SystemScene(R3F Canvas + Star + Planet×3 + 궤도선 + OrbitControls) 구현, 회합주기 자동 측정 테스트(§10 테스트 3·4: 8.60d/6.04d) 작성
+- 주의사항/함정: System View 스케일 = 거리 실척(AU) + 천체 반경만 과장(§7.3). 회합주기 테스트는 kepler.propagate로 b·c(or d)의 위상각 차가 0이 되는 연속 시점 간격을 수치 측정하면 됨. propagate의 trueAnomaly는 (−π,π], meanAnomaly는 [0,2π) — 각도 비교 시 정규화 주의
+- 테스트 상태: 11 passed / 0 failed (상수 무결성 4 + 케플러 §10 테스트 7건)
