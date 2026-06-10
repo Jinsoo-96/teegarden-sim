@@ -1,0 +1,66 @@
+# 배치 위치: .github/workflows/deploy.yml
+# main 푸시 시 자동으로 테스트 → Vite 빌드 → GitHub Pages 배포.
+# paths 필터: 문서만 있는 초기 푸시(M0-1)에는 발동하지 않음 → 실패 로그 없이 깔끔하게 시작.
+# 액션 버전이 deprecated 경고를 내면 메이저 버전만 올릴 것 (구조 변경 금지).
+
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "src/**"
+      - "public/**"
+      - "index.html"
+      - "package.json"
+      - "package-lock.json"
+      - "vite.config.*"
+      - ".github/workflows/deploy.yml"
+  workflow_dispatch: # 수동 실행도 허용 (gh workflow run deploy.yml)
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Test (배포 게이트 — 스펙 §10 검증 포함, 실패 시 배포 중단)
+        run: npm test
+
+      - name: Build (base를 저장소 이름으로 자동 설정)
+        run: npm run build -- --base=/${{ github.event.repository.name }}/
+
+      - uses: actions/configure-pages@v5
+        with:
+          enablement: true # 첫 실행 시 Pages 자동 활성화 (수동 설정 불필요)
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
