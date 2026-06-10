@@ -1,0 +1,10 @@
+/* 최소 전역 스타일 — 본격 UI 디자인은 §7.6 (M2-3 이후) */
+:root {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  background: #14161c; /* 임시 — §7.6 암청회 투톤은 추후 */
+  color: #d8d4cd;
+}

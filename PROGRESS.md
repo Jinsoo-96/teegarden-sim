@@ -7,14 +7,12 @@
 
 ## NOW (이번 세션 태스크 — 항상 1개)
 
-- [ ] **M1-1** 프로젝트 스캐폴드: Vite+React+TS, R3F/drei/zustand/leva/postprocessing/vitest 설치. `src/data/teegarden.ts`를 스펙 §2 코드블록 그대로 생성. `docs/`에 스펙 문서 배치 확인. package.json의 `"test"`는 반드시 `vitest run`(워치 금지 — CI와 세션 프로토콜이 멈추지 않게).
-  - DoD: `npm run dev` 동작 + 상수 무결성 테스트 1개 통과 (STAR.teffK===3034 등 스냅샷)
+- [ ] **M1-2** 케플러 엔진 `src/sim/kepler.ts` (스펙 §3.1): solveKepler + propagate(planet, jd) → {posAU, trueAnomaly}
+  - DoD: §10 테스트 1(a값), 7(시민일), 8(칭동 위상 복귀) 통과
 
 ## NEXT (위에서부터 순서대로 NOW로 승격)
 
 > 공통 규칙: **각 마일스톤 M{n}의 마지막 태스크에는 CLAUDE.md 'Git/배포 규약'의 dev→main 머지(=자동 배포)와 `gh run watch` 성공 확인까지 포함**된다.
-- [ ] **M1-2** 케플러 엔진 `src/sim/kepler.ts` (스펙 §3.1): solveKepler + propagate(planet, jd) → {posAU, trueAnomaly}
-  - DoD: §10 테스트 1(a값), 7(시민일), 8(칭동 위상 복귀) 통과
 - [ ] **M1-3** System View 기본: Star + Planet×3 + 궤도선, 카메라 컨트롤 (스펙 §7.2-7.3 스케일 전략)
   - DoD: 렌더 확인 + 회합주기 자동 측정 테스트 (§10 테스트 3, 4: 8.60d / 6.04d)
 - [ ] **M1-4** 첫 배포 (M1 마감): `npm run build` 로컬 확인 → CLAUDE.md 규약대로 dev→main 머지 → `gh run watch` 성공 → `https://<owner>.github.io/teegarden-sim/` 접속해 System View 확인 → URL을 README.md 최상단에 기록 후 dev에 커밋
@@ -47,11 +45,13 @@
 
 ## DONE
 
+- [x] **M1-1** 프로젝트 스캐폴드: Vite+React+TS + §7.1 스택 + vitest, 스펙 §2 → `src/data/teegarden.ts` 추출 생성, 상수 무결성 테스트 4개 통과 (2026-06-11)
 - [x] **M0-1** GitHub 저장소·브랜치·배포 골격: git init → 초기 커밋 → `Jinsoo-96/teegarden-sim` public 생성 → main/dev 푸시 (initial commit, 2026-06-11)
 
 ## DECISIONS (스펙에 없어서 내린 결정 — 1줄씩 누적)
 
 - `2026-06-11 M0-1: .gitignore에 files.zip 추가 — 이유: 원본 zip은 로컬 백업용, 내용물은 이미 저장소 경로에 배치됨`
+- `2026-06-11 M1-1: 최신 안정판 채택 — Vite 8 / React 19 / three 0.184(=r160+ 충족) / vitest 4. 타입 전용 @types/three 추가. §2 상수는 awk로 스펙 코드블록에서 기계 추출(수기 금지 규칙 준수)`
 
 ## KNOWN ISSUES
 
@@ -59,8 +59,8 @@
 
 ## HANDOFF NOTE (마지막 세션이 덮어쓰는 인수인계 — 항상 최신 1개만)
 
-- 마지막 작업 파일/함수: (코드 없음 — M0-1은 저장소 골격 작업)
-- 어디까지 했나: M0-1 완료 — 원격 `Jinsoo-96/teegarden-sim` 생성, main/dev 푸시됨, 현재 브랜치 dev
-- 다음 세션 첫 행동: M1-1 수행 — Vite+React+TS 스캐폴드 후 스펙 §2 코드블록을 `src/data/teegarden.ts`로 그대로 복사, vitest 상수 무결성 테스트 1개 작성
-- 주의사항/함정: package.json의 `"test"`는 반드시 `vitest run`(워치 모드 금지 — CI·세션 프로토콜이 멈춤). 스펙 §2 상수는 손으로 타이핑하지 말고 docs의 코드블록에서 복사할 것
-- 테스트 상태: N/A (npm 프로젝트 아직 없음)
+- 마지막 작업 파일/함수: `src/data/teegarden.ts`(스펙 §2 추출본) + `src/data/teegarden.test.ts`(상수 무결성)
+- 어디까지 했나: M1-1 완료 — Vite+React+TS 스캐폴드, §7.1 스택 전체 설치, `npm test`/`npm run build`/`npm run dev` 모두 정상
+- 다음 세션 첫 행동: M1-2 수행 — 스펙 §3.1 읽고 `src/sim/kepler.ts` 작성 (solveKepler 뉴턴-랩슨 1e-10 + propagate), §10 테스트 1(a값)·7(시민일)·8(칭동 위상 복귀) 작성
+- 주의사항/함정: 단위는 AU/day/M☉, G=4π²·AU³/(yr²·Msun) — yr↔day 환산 주의. 공면 가정(y-up, 황도면=xz). epoch 위상은 meanLongitudeAtEpochDeg 사용
+- 테스트 상태: 4 passed / 0 failed (teegarden.test.ts — 상수 무결성 4건)
