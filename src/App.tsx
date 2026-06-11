@@ -3,6 +3,7 @@ import { Canvas } from "@react-three/fiber";
 import { STAR } from "./data/teegarden";
 import SystemScene from "./components/SystemScene";
 import TimeController from "./components/TimeController";
+import CivicClock from "./components/CivicClock";
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
       <Canvas camera={{ position: [0.07, 0.06, 0.1], fov: 50, near: 1e-4, far: 10 }}>
         <SystemScene />
       </Canvas>
+      <CivicClock />
       <TimeController />
     </div>
   );
