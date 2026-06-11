@@ -16,7 +16,7 @@ interface SettingsState {
 }
 
 export const useSettingsStore = create<SettingsState>((set) => ({
-  mode: "system",
+  mode: "surface", // 기본 = 터미네이터 하늘 (프로젝트의 주인공 화면, M7-1)
   observer: { latitudeDeg: 15, longitudeDeg: 90 }, // §9 권장 기본: 저녁 터미네이터, 위도 15°
   showLabels: true,
   showCandidateE: false,

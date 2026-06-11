@@ -26,6 +26,7 @@ function mulberry32(seed: number) {
 }
 
 // 능선: 원기둥 윗단 정점을 무작위 높이로 변위한 저폴리 실루엣
+// M7-1: 전체 하향(≤1.1 ≈0.8°) + 항성 방위(서, −x) ±40°는 더 낮게 — 칭동 일출(최대 3.44°) 가림 방지
 function useRidgeGeometry() {
   return useMemo(() => {
     const rand = mulberry32(42);
@@ -33,7 +34,11 @@ function useRidgeGeometry() {
     const pos = geo.attributes.position;
     for (let i = 0; i < pos.count; i++) {
       if (pos.getY(i) > 0) {
-        pos.setY(i, 0.4 + rand() * 2.6); // 능선 높이 0.4–3.0 (수평선 위 ~0.3–2°)
+        const ang = Math.atan2(pos.getZ(i), pos.getX(i));
+        let d = Math.abs(ang - Math.PI);
+        if (d > Math.PI) d = 2 * Math.PI - d; // 서쪽(π)과의 각거리
+        const westSector = d < 0.7; // ±40°
+        pos.setY(i, westSector ? 0.12 + rand() * 0.35 : 0.25 + rand() * 0.85);
       } else {
         pos.setY(i, -0.5);
       }
@@ -43,27 +48,30 @@ function useRidgeGeometry() {
   }, []);
 }
 
-// 도시 불빛: 관측자 주변 점광 클러스터 — 청색강화(§5.1) 위주 + 일부 온백색
+// 도시 불빛 (M7-1 정리): 군집 3곳으로 모아 "도시" 인상 + 감광·축소 — 정체불명 점 인상 제거
 function useCityLights() {
   return useMemo(() => {
     const rand = mulberry32(7);
-    const n = 90;
+    const clusters = [0.7, 2.3, 4.5].map((a) => ({
+      x: Math.cos(a) * (16 + rand() * 14),
+      z: Math.sin(a) * (16 + rand() * 14),
+    }));
+    const n = 54;
     const pos = new Float32Array(n * 3);
     const col = new Float32Array(n * 3);
     const size = new Float32Array(n);
     const alpha = new Float32Array(n);
     for (let i = 0; i < n; i++) {
-      const ang = rand() * Math.PI * 2;
-      const r = 6 + rand() * 42;
-      pos[i * 3] = Math.cos(ang) * r;
-      pos[i * 3 + 1] = 0.06;
-      pos[i * 3 + 2] = Math.sin(ang) * r;
+      const c = clusters[i % clusters.length];
+      pos[i * 3] = c.x + (rand() - rand()) * 7;
+      pos[i * 3 + 1] = 0.05;
+      pos[i * 3 + 2] = c.z + (rand() - rand()) * 7;
       const blue = rand() < 0.75; // §5.1: 청색강화 조명이 다수
-      col[i * 3] = blue ? 0.78 : 1.0;
-      col[i * 3 + 1] = blue ? 0.86 : 0.83;
-      col[i * 3 + 2] = blue ? 1.0 : 0.6;
-      size[i] = 1.4 + rand() * 2.2;
-      alpha[i] = 0.5 + rand() * 0.5;
+      col[i * 3] = blue ? 0.7 : 0.95;
+      col[i * 3 + 1] = blue ? 0.8 : 0.78;
+      col[i * 3 + 2] = blue ? 0.95 : 0.55;
+      size[i] = 1.0 + rand() * 1.1;
+      alpha[i] = 0.25 + rand() * 0.35;
     }
     const geo = new BufferGeometry();
     geo.setAttribute("position", new Float32BufferAttribute(pos, 3));
@@ -112,14 +120,14 @@ export default function Terrain() {
   const [lightsOn] = useState(true);
   return (
     <group>
-      {/* 지면 */}
+      {/* 지면 — 돔(104)보다 크게 확장해 수평선 아래 하늘 누출 차단 (M7-1) */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.15, 0]}>
-        <circleGeometry args={[RIDGE_R + 2, 64]} />
+        <circleGeometry args={[130, 64]} />
         <meshBasicMaterial color="#0b0d12" />
       </mesh>
-      {/* 저폴리 지평선 능선 실루엣 */}
+      {/* 저폴리 지평선 능선 실루엣 — 지면·하늘과 구분되는 암청 톤 (M7-1) */}
       <mesh geometry={ridge} position={[0, 0, 0]}>
-        <meshBasicMaterial color="#05060a" side={2} />
+        <meshBasicMaterial color="#131826" side={2} />
       </mesh>
       {/* 도시 인공조명 — 시민 거주의 근거 연출 */}
       {lightsOn && (

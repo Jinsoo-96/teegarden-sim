@@ -60,6 +60,12 @@ export default function GiantStar() {
   });
 
   const showLabels = useSettingsStore((s) => s.showLabels);
+  const observer = useSettingsStore((s) => s.observer);
+  // 완전히 진 동안(중심 고도 < −각반지름) 라벨 숨김 (M7-3)
+  const jdCoarse = useTimeStore((s) => Math.round(s.simTimeJD * 100) / 100);
+  const starUp =
+    inertialDirToHorizontal(starDirectionFromPlanet(b, jdCoarse), b, jdCoarse, observer)
+      .altitudeRad > -starAngularRadiusRad(jdCoarse);
   return (
     // renderOrder 2: 배경 별(1) 위에 그려져 엄폐를 표현 (§6.3 엄폐 연출은 M4-2)
     <mesh ref={mesh} renderOrder={2}>
@@ -73,7 +79,7 @@ export default function GiantStar() {
         transparent
         depthWrite={false}
       />
-      {showLabels && (
+      {showLabels && starUp && (
         <Html position={[0, 1.5, 0]} style={{ pointerEvents: "none" }} center>
           <div
             style={{
