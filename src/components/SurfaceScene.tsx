@@ -3,6 +3,7 @@
 import { useFrame } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import GiantStar from "./GiantStar";
+import CelestialSphere from "./CelestialSphere";
 import { useTimeStore } from "../state/timeStore";
 
 export const DOME_R = 100; // 천구돔 반경 (씬 단위 — 모든 천체는 각도로만 배치, §7.3)
@@ -17,6 +18,7 @@ export default function SurfaceScene() {
     <>
       {/* 임시 하늘색 — M5-1 산란 셰이더가 교체 (영구 박명의 암청회) */}
       <color attach="background" args={["#10141f"]} />
+      <CelestialSphere />
       <GiantStar />
       {/* 지면: 수평선 실루엣 임시판 (M6-1에서 지형으로 교체) */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.15, 0]}>

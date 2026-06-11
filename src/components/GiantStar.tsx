@@ -50,7 +50,8 @@ export default function GiantStar() {
   });
 
   return (
-    <mesh ref={mesh}>
+    // renderOrder 2: 배경 별(1) 위에 그려져 엄폐를 표현 (§6.3 엄폐 연출은 M4-2)
+    <mesh ref={mesh} renderOrder={2}>
       {/* 2.6×2.6 평면: 셰이더 좌표 r=1이 림, 1.3까지 채층 글로우 */}
       <planeGeometry args={[2.6, 2.6]} />
       <shaderMaterial

@@ -7,14 +7,12 @@
 
 ## NOW (이번 세션 태스크 — 항상 1개)
 
-- [ ] **M3-3** 배경 천구: HYG v3 전처리 스크립트(`scripts/prepStars.ts`, V≤6.5) + Points 별필드 + 태양 마커(천칭자리, V2.75) + 4.90634일 일주운동 (스펙 §6.4) — **M3 마감: dev→main 머지(release: M3) + `gh run watch` 성공 확인 포함**
-  - DoD: 별 ~9k개 로드, 태양 라벨 토글
+- [ ] **M4-1** c/d 하늘 객체: 실시간 위치·위상(항상 gibbous 91%/97%+)·등급·각크기, 표면밝기 보존 원반 렌더 (스펙 §6.3)
+  - DoD: 충/구상/합 3지점 값이 §6.3 표와 일치하는 테스트 (c: 15.2′/−6.5, 8.0′/−5.0, 4.2′/−3.7)
 
 ## NEXT (위에서부터 순서대로 NOW로 승격)
 
 > 공통 규칙: **각 마일스톤 M{n}의 마지막 태스크에는 CLAUDE.md 'Git/배포 규약'의 dev→main 머지(=자동 배포)와 `gh run watch` 성공 확인까지 포함**된다.
-- [ ] **M4-1** c/d 하늘 객체: 실시간 위치·위상(항상 gibbous 91%/97%+)·등급·각크기, 표면밝기 보존 원반 렌더 (스펙 §6.3)
-  - DoD: 충/구상/합 3지점 값이 §6.3 표와 일치하는 테스트 (c: 15.2′/−6.5, 8.0′/−5.0, 4.2′/−3.7)
 - [ ] **M4-2** 이벤트 예측기 + 가시성 캘린더: 다음 충/합/엄폐/칭동일출 계산, HUD 캘린더, 엄폐 연출(합 시 항성 뒤 ~1.4h) (스펙 §6.3)
   - DoD: 예측치가 시뮬레이션 실측과 일치
 - [ ] **M5-1** M왜성 대기산란 스카이 셰이더 (스펙 §6.5): 3034K 플랑크 입력, 파장샘플 Rayleigh+Mie, 프리셋 3종(1bar/0.1bar/무대기)
@@ -29,7 +27,8 @@
 
 ## DONE
 
-- [x] **M3-2** 거대 항성 디스크: starSurface 셰이더(2차 limb darkening + fbm 쌀알무늬 + 몸체고정 흑점 3개 + 채층 글로우 림) + GiantStar 컴포넌트(칭동 고도·각크기 반영). §10 테스트 2·5 통과 (2026-06-11)
+- [x] **M3-3** 배경 천구 (M3 마감): prepStars.ts(HYG v3.8 → 8,920개) + CelestialSphere(Points 셰이더 별필드, B−V 색, 그룹 회전 일주운동) + 태양 마커·라벨 토글. release: M3 배포 (2026-06-11)
+- [x] **M3-2** 거대 항성 디스크: starSurface 셰이더(2차 limb darkening + fbm 쌀알무늬 + 몸체고정 흑점 3개 + 채층 글로우 림) + GiantStar 컴포넌트(칭동 고도·각크기 반영). §10 테스트 2·5 통과 (commit fe19619, 2026-06-11)
 - [x] **M3-1** 천구좌표 유틸 `src/sim/skyCoords.ts`(지평좌표/RA·Dec/관측자 파라미터) + SurfaceScene 스캐폴드(돔·지면·항성 플레이스홀더) + ModeSwitch + settingsStore. DoD 테스트 8건 통과 (commit 151319b, 2026-06-11)
 - [x] **M2-3** 시민 시계 위젯 (M2 마감): SVG 원형 24시민시 다이얼 + 칭동 고도 게이지(완전일출 눈금·항성 마커) + 주간 5칸 바 + 일출/c충/d충 카운트다운. release: M2 배포 (commit d1edb5f → main b4a9c54, 2026-06-11)
 - [x] **M2-2** 시민시간 변환 모듈 `src/sim/civicTime.ts`: 칭동 일출 앵커(WEEK_ZERO_JD) + jdToCivic(week/civicDay/시분초) + HUD 시민시각 표시. §10 테스트 7·8 + 경계값 11건 (commit 1f903e7, 2026-06-11)
@@ -51,6 +50,7 @@
 - `2026-06-11 M2-2: 칭동 고도 부호 규약 — 저녁 터미네이터(기본 관측자) 고도 = +librationOffsetRad. 칭동 일출 = 고도가 +각반지름을 상향 통과(스펙 §5.2 "완전히 떠오르는 순간" 그대로). 아침 터미네이터는 부호 반전으로 M3-1에서 처리`
 - `2026-06-11 M3-1: 자전각 규약 Λ = M + π(등속), 행성 경도 동쪽 양수 — 이 조합에서 저녁 터미네이터(+90°) 항성 고도가 librationOffsetRad와 해석적으로 정확히 일치(테스트로 검증). RA/Dec→관성계는 직접 매핑(α→xz각, δ→y) [가정: 행성계-천구 정렬 미관측이라 임의]`
 - `2026-06-11 M3-2: 흑점 3개 고정 배치(스펙 "2–4개" 범위 내 중간값), 셰이더는 .frag 파일 대신 TS 문자열 모듈(src/shaders/)로 관리 — vite 플러그인 추가 없이 §7.1 스택 유지. 항성 디스크 = 빌보드 평면(r=1 림, 1.3까지 채층 글로우)`
+- `2026-06-11 M3-3: HYG는 v3 최신판 v3.8 사용(스펙 "v3" 충족). 원본 CSV는 미커밋(CC BY-SA 원본 대신 산출 stars.json 232KB만), B−V→색은 Ballesteros 온도식+간이 팔레트 근사. 은하수 텍스처는 보류(§6.4 "또는" 옵션 — 별필드로 충분). tsconfig.app types에 node 추가(테스트의 node:fs 때문)`
 
 ## KNOWN ISSUES
 
@@ -60,8 +60,8 @@
 
 ## HANDOFF NOTE (마지막 세션이 덮어쓰는 인수인계 — 항상 최신 1개만)
 
-- 마지막 작업 파일/함수: `src/shaders/starSurface.ts` + `src/components/GiantStar.tsx`
-- 어디까지 했나: M3-2 완료 — 항성 셰이더 디스크(limb darkening·쌀알무늬·흑점·채층 림)가 Surface View에서 칭동 고도로 승강, §10 테스트 2·5 통과
-- 다음 세션 첫 행동: M3-3 수행 — 스펙 §6.4 읽고 ①`scripts/prepStars.ts`: HYG v3 CSV(github.com/astronexus/HYG-Database) 다운로드→V≤6.5 필터→`public/stars.json`(ra/dec/mag/bv ~9k개) ②CelestialSphere 컴포넌트: THREE.Points + 등급→크기/밝기 + B−V→색, raDecToInertialDir(skyCoords 기존 함수)로 방향→돔 투영, 자전에 따른 일주운동(observerFrame이 자동 처리) ③태양 마커: SKY_EVENTS.sunFromTeegarden(RA 14.883h, Dec −16.88°, V2.75) + 라벨 토글. **M3 마감: 완료 후 dev→main 머지(release: M3) + gh run watch + 배포 확인**
-- 주의사항/함정: HYG 데이터 다운로드는 네트워크 필요 — curl로 받아서 전처리 후 public/에 저장(원본 CSV는 .gitignore, 산출 JSON만 커밋). 별 방향은 raDecToInertialDir → inertialDirToHorizontal → horizontalToScenePos 파이프라인 재사용. 별이 돔에 붙박이가 아니라 관성계 고정이므로 매 프레임 변환하면 9k×변환 비용 — Points 전체를 그룹 회전(자전 역행렬)으로 처리하는 게 효율적
-- 테스트 상태: 48 passed / 0 failed (상수 4 + 케플러 7 + 회합 3 + julian 4 + timeStore 5 + events 2 + civicTime 11 + skyCoords 8 + starDisk 4)
+- 마지막 작업 파일/함수: `src/components/CelestialSphere.tsx` + `scripts/prepStars.ts` + `public/stars.json`
+- 어디까지 했나: **M3 마일스톤 완료** — Surface View에 거대 항성 + 별 8,920개 + 태양 마커(일주운동 포함) 라이브 배포(release: M3)
+- 다음 세션 첫 행동: M4-1 수행 — 스펙 §6.3 읽고 `src/sim/planetVis.ts`: c·d의 실시간 각지름·위상각·위상률·겉보기등급(스펙 §6.3 구현 노트 공식) 계산 + PlanetInSky 컴포넌트(위상 라이팅 원반, 표면밝기 보존). DoD: 충/구상/합 3지점이 §6.3 표와 일치(c: 15.2′/−6.5, 8.0′/−5.0, 4.2′/−3.7 — 허용오차 5%/0.3등급)
+- 주의사항/함정: 등급 공식의 m_star_from_b = −22.3(§9). 위상각 α는 항성–행성(c)–관측자(b) 각. 충/구상/합 시점은 events.nextOppositionJd 패턴 재사용(합 = Δλ=π 교차, 구상 = 이각 90°). 거리 Δ는 b–c 실시간 벡터차. CelestialSphere의 그룹 회전 행렬 패턴을 PlanetInSky 위치에도 동일 적용 가능(또는 horizontalToScenePos 직접)
+- 테스트 상태: 52 passed / 0 failed (+ starCatalog 4)
