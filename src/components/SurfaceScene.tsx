@@ -7,6 +7,9 @@ import type { DirectionalLight } from "three";
 import GiantStar from "./GiantStar";
 import CelestialSphere from "./CelestialSphere";
 import PlanetInSky from "./PlanetInSky";
+import SkyDome from "./SkyDome";
+import FlareSystem from "./FlareSystem";
+import PostFX from "./PostFX";
 import { PLANETS } from "../data/teegarden";
 import {
   horizontalToScenePos,
@@ -41,13 +44,16 @@ export default function SurfaceScene() {
 
   return (
     <>
-      {/* 임시 하늘색 — M5-1 산란 셰이더가 교체 (영구 박명의 암청회) */}
-      <color attach="background" args={["#10141f"]} />
+      {/* 무대기 프리셋 폴백 배경 — 대기 있으면 SkyDome이 덮음 */}
+      <color attach="background" args={["#05060a"]} />
+      <SkyDome />
       <CelestialSphere />
       <GiantStar />
       <StarLight />
       <PlanetInSky planet={c} />
       <PlanetInSky planet={d} />
+      <FlareSystem />
+      <PostFX />
       {/* 지면: 수평선 실루엣 임시판 (M6-1에서 지형으로 교체) */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.15, 0]}>
         <circleGeometry args={[DOME_R * 2, 64]} />
