@@ -3,8 +3,14 @@
   color-scheme: dark;
 }
 
+html,
+body,
+#root {
+  height: 100%;
+}
+
 body {
   margin: 0;
-  background: #14161c; /* 임시 — §7.6 암청회 투톤은 추후 */
+  background: #0a0c12;
   color: #d8d4cd;
 }

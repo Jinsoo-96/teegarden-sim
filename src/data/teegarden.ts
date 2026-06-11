@@ -72,3 +72,11 @@ export const SKY_EVENTS = {
   librationPeriodDays: 4.90634, // 항성의 수평선 승강 주기 (진폭 ±3.4°)
   sunFromTeegarden: { raHours: 14.883, decDeg: -16.88, vMag: 2.75, constellation: "Libra" },
 } as const;
+
+// --- 이하 스펙 §2 코드블록 외 추가 상수 (M1-3, CLAUDE.md 불변 규칙 1) ---
+// 단위 환산: 렌더 시 반경을 AU로 변환하기 위함
+export const UNITS = {
+  kmPerAU: 1.495978707e8, // 표준 천문단위 [정의]
+  starRadiusKm: 83480,    // R★ = 0.120 R☉ = 83,480 km [관측, 스펙 §1.1]
+  earthRadiusKm: 6371,    // R⊕ 표준값 [정의]
+} as const;
