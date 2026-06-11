@@ -6,6 +6,7 @@ import SurfaceScene from "./components/SurfaceScene";
 import ModeSwitch from "./components/ModeSwitch";
 import TimeController from "./components/TimeController";
 import CivicClock from "./components/CivicClock";
+import EventCalendar from "./components/EventCalendar";
 import { useSettingsStore } from "./state/settingsStore";
 
 function App() {
@@ -43,6 +44,7 @@ function App() {
 
       <ModeSwitch />
       <CivicClock />
+      <EventCalendar />
       <TimeController />
     </div>
   );

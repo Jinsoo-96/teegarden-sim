@@ -80,3 +80,9 @@ export const UNITS = {
   starRadiusKm: 83480,    // R★ = 0.120 R☉ = 83,480 km [관측, 스펙 §1.1]
   earthRadiusKm: 6371,    // R⊕ 표준값 [정의]
 } as const;
+
+// 가시성 계산 상수 (M4-1 추가)
+export const VIS = {
+  starVmagFromB: -22.3, // b에서 본 항성 겉보기등급 [유도, 스펙 §9]
+  geometricAlbedo: 0.3, // 행성 기하 알베도 A_g [가정, 스펙 §8-6]
+} as const;

@@ -7,16 +7,12 @@
 
 ## NOW (이번 세션 태스크 — 항상 1개)
 
-- [ ] **M4-1** c/d 하늘 객체: 실시간 위치·위상(항상 gibbous 91%/97%+)·등급·각크기, 표면밝기 보존 원반 렌더 (스펙 §6.3)
-  - DoD: 충/구상/합 3지점 값이 §6.3 표와 일치하는 테스트 (c: 15.2′/−6.5, 8.0′/−5.0, 4.2′/−3.7)
+- [ ] **M5-1** M왜성 대기산란 스카이 셰이더 (스펙 §6.5): 3034K 플랑크 입력, 파장샘플 Rayleigh+Mie, 프리셋 3종(1bar/0.1bar/무대기)
+  - DoD: 터미네이터 영구 박명 그라데이션 시각 확인, quality 4/8/16 샘플 옵션
 
 ## NEXT (위에서부터 순서대로 NOW로 승격)
 
 > 공통 규칙: **각 마일스톤 M{n}의 마지막 태스크에는 CLAUDE.md 'Git/배포 규약'의 dev→main 머지(=자동 배포)와 `gh run watch` 성공 확인까지 포함**된다.
-- [ ] **M4-2** 이벤트 예측기 + 가시성 캘린더: 다음 충/합/엄폐/칭동일출 계산, HUD 캘린더, 엄폐 연출(합 시 항성 뒤 ~1.4h) (스펙 §6.3)
-  - DoD: 예측치가 시뮬레이션 실측과 일치
-- [ ] **M5-1** M왜성 대기산란 스카이 셰이더 (스펙 §6.5): 3034K 플랑크 입력, 파장샘플 Rayleigh+Mie, 프리셋 3종(1bar/0.1bar/무대기)
-  - DoD: 터미네이터 영구 박명 그라데이션 시각 확인, quality 4/8/16 샘플 옵션
 - [ ] **M5-2** 플레어 시스템 (스펙 §6.2): 푸아송 λ=0.026/일, 130–600초 라이프사이클, 항성 핫스팟 + 하늘색 10,000K 시프트
   - DoD: 디버그 트리거 버튼 + 자동 발생 로그
 - [ ] **M5-3** 광학 캘리브레이션: 등급→HDR 변환 유틸(기준 항성 V−22.3), selective bloom(항성/플레어/c·d만), ACES 톤매핑 (스펙 §7.4-7.5)
@@ -27,7 +23,9 @@
 
 ## DONE
 
-- [x] **M3-3** 배경 천구 (M3 마감): prepStars.ts(HYG v3.8 → 8,920개) + CelestialSphere(Points 셰이더 별필드, B−V 색, 그룹 회전 일주운동) + 태양 마커·라벨 토글. release: M3 배포 (2026-06-11)
+- [x] **M4-2** 이벤트 예측기 + 가시성 캘린더 (M4 마감): nextConjunctionJd/nextOccultation(이분 탐색) + EventCalendar HUD(점프 버튼·시민시각 병기). 예측 = 실측 1분 이내 검증. release: M4 배포 (2026-06-11)
+- [x] **M4-1** c/d 하늘 객체: planetVis.ts(위상각·조명률·각지름·등급, §6.3 공식 그대로) + PlanetInSky(위상 라이팅 구체) + StarLight. §10 테스트 6 포함 §6.3 표 6지점 + 위상 범위 검증 10건 통과 (commit bee3df8, 2026-06-11)
+- [x] **M3-3** 배경 천구 (M3 마감): prepStars.ts(HYG v3.8 → 8,920개) + CelestialSphere(Points 셰이더 별필드, B−V 색, 그룹 회전 일주운동) + 태양 마커·라벨 토글. release: M3 배포 (commit e69f7ff → main 1dbbc8a, 2026-06-11)
 - [x] **M3-2** 거대 항성 디스크: starSurface 셰이더(2차 limb darkening + fbm 쌀알무늬 + 몸체고정 흑점 3개 + 채층 글로우 림) + GiantStar 컴포넌트(칭동 고도·각크기 반영). §10 테스트 2·5 통과 (commit fe19619, 2026-06-11)
 - [x] **M3-1** 천구좌표 유틸 `src/sim/skyCoords.ts`(지평좌표/RA·Dec/관측자 파라미터) + SurfaceScene 스캐폴드(돔·지면·항성 플레이스홀더) + ModeSwitch + settingsStore. DoD 테스트 8건 통과 (commit 151319b, 2026-06-11)
 - [x] **M2-3** 시민 시계 위젯 (M2 마감): SVG 원형 24시민시 다이얼 + 칭동 고도 게이지(완전일출 눈금·항성 마커) + 주간 5칸 바 + 일출/c충/d충 카운트다운. release: M2 배포 (commit d1edb5f → main b4a9c54, 2026-06-11)
@@ -51,6 +49,7 @@
 - `2026-06-11 M3-1: 자전각 규약 Λ = M + π(등속), 행성 경도 동쪽 양수 — 이 조합에서 저녁 터미네이터(+90°) 항성 고도가 librationOffsetRad와 해석적으로 정확히 일치(테스트로 검증). RA/Dec→관성계는 직접 매핑(α→xz각, δ→y) [가정: 행성계-천구 정렬 미관측이라 임의]`
 - `2026-06-11 M3-2: 흑점 3개 고정 배치(스펙 "2–4개" 범위 내 중간값), 셰이더는 .frag 파일 대신 TS 문자열 모듈(src/shaders/)로 관리 — vite 플러그인 추가 없이 §7.1 스택 유지. 항성 디스크 = 빌보드 평면(r=1 림, 1.3까지 채층 글로우)`
 - `2026-06-11 M3-3: HYG는 v3 최신판 v3.8 사용(스펙 "v3" 충족). 원본 CSV는 미커밋(CC BY-SA 원본 대신 산출 stars.json 232KB만), B−V→색은 Ballesteros 온도식+간이 팔레트 근사. 은하수 텍스처는 보류(§6.4 "또는" 옵션 — 별필드로 충분). tsconfig.app types에 node 추가(테스트의 node:fs 때문)`
+- `2026-06-11 M4-2: 엄폐 지속시간 실계산 c≈2.2h/d≈1.3h — 스펙 §6.3의 ~1.4h/~1.0h는 시차 투영 인자(a_p/(a_b+a_p)) 생략 근사로 판단(2.47°÷회합각속도=1.42h와 정확히 일치). 시뮬레이션 기하가 정확하므로 실계산 채택, 스펙 무수정. 엄폐 판정 = 행성 중심 각거리 < 항성 각반지름`
 
 ## KNOWN ISSUES
 
@@ -60,8 +59,8 @@
 
 ## HANDOFF NOTE (마지막 세션이 덮어쓰는 인수인계 — 항상 최신 1개만)
 
-- 마지막 작업 파일/함수: `src/components/CelestialSphere.tsx` + `scripts/prepStars.ts` + `public/stars.json`
-- 어디까지 했나: **M3 마일스톤 완료** — Surface View에 거대 항성 + 별 8,920개 + 태양 마커(일주운동 포함) 라이브 배포(release: M3)
-- 다음 세션 첫 행동: M4-1 수행 — 스펙 §6.3 읽고 `src/sim/planetVis.ts`: c·d의 실시간 각지름·위상각·위상률·겉보기등급(스펙 §6.3 구현 노트 공식) 계산 + PlanetInSky 컴포넌트(위상 라이팅 원반, 표면밝기 보존). DoD: 충/구상/합 3지점이 §6.3 표와 일치(c: 15.2′/−6.5, 8.0′/−5.0, 4.2′/−3.7 — 허용오차 5%/0.3등급)
-- 주의사항/함정: 등급 공식의 m_star_from_b = −22.3(§9). 위상각 α는 항성–행성(c)–관측자(b) 각. 충/구상/합 시점은 events.nextOppositionJd 패턴 재사용(합 = Δλ=π 교차, 구상 = 이각 90°). 거리 Δ는 b–c 실시간 벡터차. CelestialSphere의 그룹 회전 행렬 패턴을 PlanetInSky 위치에도 동일 적용 가능(또는 horizontalToScenePos 직접)
-- 테스트 상태: 52 passed / 0 failed (+ starCatalog 4)
+- 마지막 작업 파일/함수: `src/sim/events.ts`(nextConjunctionJd/nextOccultation) + `src/components/EventCalendar.tsx`
+- 어디까지 했나: **M4 마일스톤 완료** — c·d 하늘 객체 + 이벤트 예측기 + 가시성 캘린더 라이브 배포(release: M4)
+- 다음 세션 첫 행동: M5-1 수행 — 스펙 §6.5 읽고 skyScattering 셰이더: 돔 BackSide 구에 3034K 플랑크 분포(8–16 파장 샘플) → 파장별 Rayleigh(λ⁻⁴)+Mie 단일산란 → XYZ→sRGB. uniform: sunDir(항성 씬 방향), atmosPreset(1bar/0.1bar/무대기), sampleCount(4/8/16). leva 프리셋 토글
+- 주의사항/함정: 항성 씬 방향은 GiantStar와 동일 파이프라인(starDirectionFromPlanet→horizontal→scene) 재사용. 배경 <color>와 지면색은 셰이더 돔으로 대체/조화 필요. 별필드(renderOrder 1)가 하늘 돔 위에 보이려면 돔 renderOrder 0 + depthWrite false. CIE XYZ 적분은 단순 3밴드 근사도 허용(시각 확인이 DoD — 정밀 테스트 없음)
+- 테스트 상태: 66 passed / 0 failed (+ events 합/엄폐 4)
