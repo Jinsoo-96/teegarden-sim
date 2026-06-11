@@ -1,6 +1,6 @@
 // 시민 시계 위젯 — 스펙 §5.3 + §7.6 시그니처 디자인
 // 원형 24시민시 다이얼 + 외곽 칭동 고도 게이지 + 주간 5칸 진행 바 + 이벤트 카운트다운
-import { useRef } from "react";
+import { useState } from "react";
 import type { CSSProperties } from "react";
 import { PLANETS } from "../data/teegarden";
 import {
@@ -61,19 +61,23 @@ interface EventCache {
   dOpp: number;
 }
 
+function computeNextEvents(jd: number): EventCache {
+  return {
+    computedAt: jd,
+    sunrise: findLibrationSunrise(jd),
+    cOpp: nextOppositionJd(b, c, jd),
+    dOpp: nextOppositionJd(b, d, jd),
+  };
+}
+
 // 다음 이벤트 캐시 — 이벤트를 지나치거나 시간을 되감을 때만 재계산
+// (렌더 중 상태 조정 패턴 — react-hooks/refs 준수)
 function useNextEvents(jd: number): EventCache {
-  const cache = useRef<EventCache | null>(null);
-  const cur = cache.current;
-  if (!cur || jd < cur.computedAt || jd >= cur.sunrise || jd >= cur.cOpp || jd >= cur.dOpp) {
-    cache.current = {
-      computedAt: jd,
-      sunrise: findLibrationSunrise(jd),
-      cOpp: nextOppositionJd(b, c, jd),
-      dOpp: nextOppositionJd(b, d, jd),
-    };
+  const [cache, setCache] = useState<EventCache>(() => computeNextEvents(jd));
+  if (jd < cache.computedAt || jd >= cache.sunrise || jd >= cache.cOpp || jd >= cache.dOpp) {
+    setCache(computeNextEvents(jd));
   }
-  return cache.current as EventCache;
+  return cache;
 }
 
 function FlareAlert() {

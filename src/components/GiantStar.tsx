@@ -2,6 +2,7 @@
 // 위치/각크기는 천구좌표·칭동(§4)에서, 표면은 starSurface 셰이더가 그림
 import { useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
+import { Html } from "@react-three/drei";
 import { Color, Vector3, type Mesh, type ShaderMaterial } from "three";
 import { EPOCH_JD, PLANETS, STAR } from "../data/teegarden";
 import { starAngularRadiusRad } from "../sim/civicTime";
@@ -58,6 +59,7 @@ export default function GiantStar() {
     }
   });
 
+  const showLabels = useSettingsStore((s) => s.showLabels);
   return (
     // renderOrder 2: 배경 별(1) 위에 그려져 엄폐를 표현 (§6.3 엄폐 연출은 M4-2)
     <mesh ref={mesh} renderOrder={2}>
@@ -71,6 +73,21 @@ export default function GiantStar() {
         transparent
         depthWrite={false}
       />
+      {showLabels && (
+        <Html position={[0, 1.5, 0]} style={{ pointerEvents: "none" }} center>
+          <div
+            style={{
+              color: "#FFBA70",
+              fontFamily: "sans-serif",
+              fontSize: 11,
+              whiteSpace: "nowrap",
+              textShadow: "0 0 4px #000",
+            }}
+          >
+            {STAR.name} ({STAR.spectralType}) · 각지름 2.47° [유도]
+          </div>
+        </Html>
+      )}
     </mesh>
   );
 }

@@ -25,12 +25,15 @@ const PRESETS = {
   "대기 없음": 0.0,
 } as const;
 
+// 모바일 quality 프리셋 (§7.5): 터치 기기는 파장 샘플 4로 시작
+const IS_MOBILE = typeof navigator !== "undefined" && navigator.maxTouchPoints > 1;
+
 export default function SkyDome() {
   const mat = useRef<ShaderMaterial>(null);
   const sunVec = useMemo(() => new Vector3(), []);
   const { preset, quality } = useControls("대기 (§6.5)", {
     preset: { value: "Earth-like 1bar", options: Object.keys(PRESETS), label: "프리셋" },
-    quality: { value: 8, options: [4, 8, 16], label: "파장 샘플" },
+    quality: { value: IS_MOBILE ? 4 : 8, options: [4, 8, 16], label: "파장 샘플" },
   });
 
   const uniforms = useMemo(

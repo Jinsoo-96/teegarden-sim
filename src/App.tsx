@@ -7,6 +7,7 @@ import ModeSwitch from "./components/ModeSwitch";
 import TimeController from "./components/TimeController";
 import CivicClock from "./components/CivicClock";
 import EventCalendar from "./components/EventCalendar";
+import SettingsPanel from "./components/SettingsPanel";
 import { useSettingsStore } from "./state/settingsStore";
 
 function App() {
@@ -43,6 +44,7 @@ function App() {
       )}
 
       <ModeSwitch />
+      <SettingsPanel />
       <CivicClock />
       <EventCalendar />
       <TimeController />

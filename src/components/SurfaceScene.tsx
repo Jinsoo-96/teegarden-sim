@@ -10,6 +10,7 @@ import PlanetInSky from "./PlanetInSky";
 import SkyDome from "./SkyDome";
 import FlareSystem from "./FlareSystem";
 import PostFX from "./PostFX";
+import Terrain from "./Terrain";
 import { PLANETS } from "../data/teegarden";
 import {
   horizontalToScenePos,
@@ -54,11 +55,7 @@ export default function SurfaceScene() {
       <PlanetInSky planet={d} />
       <FlareSystem />
       <PostFX />
-      {/* 지면: 수평선 실루엣 임시판 (M6-1에서 지형으로 교체) */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.15, 0]}>
-        <circleGeometry args={[DOME_R * 2, 64]} />
-        <meshBasicMaterial color="#0b0d12" />
-      </mesh>
+      <Terrain />
       <ambientLight intensity={0.3} />
       {/* 1인칭 둘러보기: 카메라를 원점 근처에 고정하고 회전만 — §6.1 (커스텀 look controls는 추후) */}
       <OrbitControls
