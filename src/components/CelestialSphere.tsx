@@ -81,6 +81,23 @@ export default function CelestialSphere() {
     return new Vector3(d[0], d[1], d[2]).multiplyScalar(DOME_R * 0.995);
   }, []);
 
+  // 태양은 12.5광년 거리의 '별' — 점광원으로, 다른 별과 동일한 등급→크기 규칙 (M8-1)
+  const sunGeometry = useMemo(() => {
+    const s = SKY_EVENTS.sunFromTeegarden;
+    const geo = new BufferGeometry();
+    geo.setAttribute(
+      "position",
+      new Float32BufferAttribute([sunPos.x, sunPos.y, sunPos.z], 3),
+    );
+    geo.setAttribute("aColor", new Float32BufferAttribute([1.0, 0.96, 0.86], 3));
+    geo.setAttribute(
+      "aSize",
+      new Float32BufferAttribute([Math.max(1.1, 1.2 + (6.5 - s.vMag) * 0.55)], 1),
+    );
+    geo.setAttribute("aAlpha", new Float32BufferAttribute([0.95], 1));
+    return geo;
+  }, [sunPos]);
+
   // 일주운동: 씬 = [east; up; −north] 행렬 × 관성계 방향
   const mat = useMemo(() => new Matrix4(), []);
   const vE = useMemo(() => new Vector3(), []);
@@ -111,11 +128,16 @@ export default function CelestialSphere() {
           />
         </points>
       )}
-      {/* 태양 — "시민들이 고향을 가리키는 별" (천칭자리, V 2.75 [유도]) */}
-      <mesh position={sunPos} renderOrder={1}>
-        <sphereGeometry args={[0.28, 12, 8]} />
-        <meshBasicMaterial color="#fff4d6" />
-      </mesh>
+      {/* 태양 — "시민들이 고향을 가리키는 별" (천칭자리, V 2.75 [유도]) — 점광원 */}
+      <points geometry={sunGeometry} renderOrder={1}>
+        <shaderMaterial
+          vertexShader={STARFIELD_VERT}
+          fragmentShader={STARFIELD_FRAG}
+          transparent
+          depthWrite={false}
+          blending={AdditiveBlending}
+        />
+      </points>
       {sunLabel && (
         <Html position={sunPos} style={{ pointerEvents: "none" }} center distanceFactor={60}>
           <div

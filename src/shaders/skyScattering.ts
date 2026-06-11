@@ -22,11 +22,13 @@ uniform float uExposure;
 uniform float uFlare;     // 플레어 강도 0–1 — 10,000K 성분 가산 (§6.5-5)
 uniform float uFlareTempK;
 
-// 플랑크 분포 (정규화 무관 — 상대 분포만 사용). λ: nm
-float planck(float lambda, float T) {
+// 플랑크 분포 — 560nm 기준 상대값으로 정규화. λ: nm
+// (정규화 없으면 3034K의 가시광 꼬리가 ~1e-4 스케일이라 하늘이 검게 나옴 — M8-1 수정)
+float planckRel(float lambda, float T) {
   float c2 = 1.4388e7; // hc/k [nm·K]
-  float l5 = pow(lambda / 560.0, 5.0); // 스케일 안정화를 위한 상대화
-  return 1.0 / (l5 * (exp(c2 / (lambda * T)) - 1.0));
+  float ref = 560.0;
+  return pow(ref / lambda, 5.0)
+       * (exp(c2 / (ref * T)) - 1.0) / (exp(c2 / (lambda * T)) - 1.0);
 }
 
 // CIE 1931 색매칭 함수 가우시안 근사 (Wyman 단순화판)
@@ -60,7 +62,7 @@ void main() {
     float fi = (float(i) + 0.5) / float(uSamples);
     float lambda = mix(380.0, 780.0, fi);
     // 플레어 시 광원 스펙트럼에 10,000K 성분 가산 → 하늘이 푸른 기를 띰
-    float B = planck(lambda, uTeffK) + uFlare * 1.2 * planck(lambda, uFlareTempK);
+    float B = planckRel(lambda, uTeffK) + uFlare * 1.2 * planckRel(lambda, uFlareTempK);
     // 산란계수 (상대값): Rayleigh λ⁻⁴, Mie는 파장 의존 미약
     float bR = uDensity * 0.30 * pow(550.0 / lambda, 4.0);
     float bM = uDensity * 0.02;
