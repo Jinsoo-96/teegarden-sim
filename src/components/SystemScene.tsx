@@ -2,13 +2,35 @@
 // 거리 = 실척(AU 좌표), 천체 반경만 과장 배율 + True scale 토글
 import { useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
-import { Line, OrbitControls } from "@react-three/drei";
+import { Html, Line, OrbitControls } from "@react-three/drei";
 import { useControls } from "leva";
-import type { Mesh } from "three";
-import { EPOCH_JD, PLANETS, STAR, UNITS, type PlanetData } from "../data/teegarden";
+import type { Group } from "three";
+import {
+  CANDIDATE_E,
+  EPOCH_JD,
+  PLANETS,
+  STAR,
+  UNITS,
+  type PlanetData,
+} from "../data/teegarden";
 import { propagate } from "../sim/kepler";
+import { useSettingsStore } from "../state/settingsStore";
 import { useTimeStore } from "../state/timeStore";
 import PostFX from "./PostFX";
+
+// 미확정 후보행성(172d) — 토글 시에만 표시, 원궤도 가정 [관측: 신호만 확인됨]
+const CANDIDATE_AS_PLANET: PlanetData = {
+  name: CANDIDATE_E.name,
+  periodDays: CANDIDATE_E.periodDays,
+  semiMajorAxisAU: CANDIDATE_E.semiMajorAxisAU,
+  eccentricity: 0,
+  mSinIEarth: 0,
+  assumedRadiusEarth: 1,
+  tidallyLocked: false,
+  insolationSE: 0,
+  teqK_A03: 0,
+  meanLongitudeAtEpochDeg: 0,
+};
 
 const STAR_RADIUS_AU = UNITS.starRadiusKm / UNITS.kmPerAU; // ≈ 5.58e-4 (스펙 §7.3의 0.00056)
 const EARTH_RADIUS_AU = UNITS.earthRadiusKm / UNITS.kmPerAU;
@@ -20,11 +42,14 @@ const PLANET_SCALE = 80;
 function Planet({
   planet,
   trueScale,
+  dim,
 }: {
   planet: PlanetData;
   trueScale: boolean;
+  dim?: boolean;
 }) {
-  const ref = useRef<Mesh>(null);
+  const ref = useRef<Group>(null);
+  const showLabels = useSettingsStore((s) => s.showLabels);
   const radius =
     planet.assumedRadiusEarth * EARTH_RADIUS_AU * (trueScale ? 1 : PLANET_SCALE);
   useFrame(() => {
@@ -33,10 +58,29 @@ function Planet({
     ref.current.position.set(posAU[0], posAU[1], posAU[2]);
   });
   return (
-    <mesh ref={ref}>
-      <sphereGeometry args={[radius, 32, 16]} />
-      <meshStandardMaterial color="#9aa3b0" roughness={1} />
-    </mesh>
+    <group ref={ref}>
+      <mesh>
+        <sphereGeometry args={[radius, 32, 16]} />
+        <meshStandardMaterial color={dim ? "#5a6172" : "#9aa3b0"} roughness={1} />
+      </mesh>
+      {showLabels && (
+        <Html style={{ pointerEvents: "none" }} center distanceFactor={0.08}>
+          <div
+            style={{
+              color: dim ? "#8a8f99" : "#d8d4cd",
+              fontFamily: "sans-serif",
+              fontSize: 11,
+              whiteSpace: "nowrap",
+              textShadow: "0 0 4px #000",
+              transform: "translateY(-16px)",
+            }}
+          >
+            {planet.name}
+            {planet.mSinIEarth > 0 && ` · ${planet.mSinIEarth} M⊕ [관측]`}
+          </div>
+        </Html>
+      )}
+    </group>
   );
 }
 
@@ -54,6 +98,7 @@ function OrbitLine({ planet }: { planet: PlanetData }) {
 }
 
 export default function SystemScene() {
+  const showCandidateE = useSettingsStore((s) => s.showCandidateE);
   const { trueScale } = useControls({
     trueScale: { value: false, label: "True scale" },
   });
@@ -80,6 +125,12 @@ export default function SystemScene() {
           <Planet planet={p} trueScale={trueScale} />
         </group>
       ))}
+      {showCandidateE && (
+        <group>
+          <OrbitLine planet={CANDIDATE_AS_PLANET} />
+          <Planet planet={CANDIDATE_AS_PLANET} trueScale={trueScale} dim />
+        </group>
+      )}
       <OrbitControls makeDefault minDistance={0.002} maxDistance={1} />
       <PostFX />
     </>
