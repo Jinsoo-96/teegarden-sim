@@ -8,6 +8,8 @@ import TimeController from "./components/TimeController";
 import CivicClock from "./components/CivicClock";
 import EventCalendar from "./components/EventCalendar";
 import SettingsPanel from "./components/SettingsPanel";
+import MiniGlobe from "./components/MiniGlobe";
+import CompassBar from "./components/CompassBar";
 import { useSettingsStore } from "./state/settingsStore";
 
 function App() {
@@ -47,6 +49,12 @@ function App() {
       <SettingsPanel />
       <CivicClock />
       <EventCalendar />
+      {mode === "surface" && (
+        <>
+          <MiniGlobe />
+          <CompassBar />
+        </>
+      )}
       <TimeController />
     </div>
   );
