@@ -7,14 +7,12 @@
 
 ## NOW (이번 세션 태스크 — 항상 1개)
 
-- [ ] **M3-1** SurfaceScene 스캐폴드 + 천구좌표 유틸 `src/sim/skyCoords.ts`: 행성 지평좌표(고도/방위) ↔ 궤도면/RA·Dec 변환, 관측자(위도, 터미네이터 경도) 파라미터화
-  - DoD: 좌표 변환 단위테스트 (항성 방향=수평선, 반항성=반대 수평선)
+- [ ] **M3-2** 거대 항성 디스크: §6.2 셰이더(limb darkening, granulation, 흑점) + §4 칭동 고도 반영
+  - DoD: §10 테스트 2(각지름 2.47°), 5(칭동 ±3.44°)
 
 ## NEXT (위에서부터 순서대로 NOW로 승격)
 
 > 공통 규칙: **각 마일스톤 M{n}의 마지막 태스크에는 CLAUDE.md 'Git/배포 규약'의 dev→main 머지(=자동 배포)와 `gh run watch` 성공 확인까지 포함**된다.
-- [ ] **M3-2** 거대 항성 디스크: §6.2 셰이더(limb darkening, granulation, 흑점) + §4 칭동 고도 반영
-  - DoD: §10 테스트 2(각지름 2.47°), 5(칭동 ±3.44°)
 - [ ] **M3-3** 배경 천구: HYG v3 전처리 스크립트(`scripts/prepStars.ts`, V≤6.5) + Points 별필드 + 태양 마커(천칭자리, V2.75) + 4.90634일 일주운동 (스펙 §6.4)
   - DoD: 별 ~9k개 로드, 태양 라벨 토글
 - [ ] **M4-1** c/d 하늘 객체: 실시간 위치·위상(항상 gibbous 91%/97%+)·등급·각크기, 표면밝기 보존 원반 렌더 (스펙 §6.3)
@@ -33,7 +31,8 @@
 
 ## DONE
 
-- [x] **M2-3** 시민 시계 위젯 (M2 마감): SVG 원형 24시민시 다이얼 + 칭동 고도 게이지(완전일출 눈금·항성 마커) + 주간 5칸 바 + 일출/c충/d충 카운트다운. release: M2 배포 (2026-06-11)
+- [x] **M3-1** 천구좌표 유틸 `src/sim/skyCoords.ts`(지평좌표/RA·Dec/관측자 파라미터) + SurfaceScene 스캐폴드(돔·지면·항성 플레이스홀더) + ModeSwitch + settingsStore. DoD 테스트 8건 통과 (2026-06-11)
+- [x] **M2-3** 시민 시계 위젯 (M2 마감): SVG 원형 24시민시 다이얼 + 칭동 고도 게이지(완전일출 눈금·항성 마커) + 주간 5칸 바 + 일출/c충/d충 카운트다운. release: M2 배포 (commit d1edb5f → main b4a9c54, 2026-06-11)
 - [x] **M2-2** 시민시간 변환 모듈 `src/sim/civicTime.ts`: 칭동 일출 앵커(WEEK_ZERO_JD) + jdToCivic(week/civicDay/시분초) + HUD 시민시각 표시. §10 테스트 7·8 + 경계값 11건 (commit 1f903e7, 2026-06-11)
 - [x] **M2-1** 시간 스토어+컨트롤러: zustand 스토어(§3.2 적분 공식) + HUD(재생/일시정지·로그 속도·스크럽·충 점프 버튼) + JD↔UTC 변환, 테스트 11건 추가 (commit ffd6aad, 2026-06-11)
 - [x] **M1-4** 첫 배포 (M1 마감): dev→main 머지(release: M1, d2e3ac0) → Pages 수동 활성화 후 Actions 성공 → https://jinsoo-96.github.io/teegarden-sim/ 라이브 확인 → README에 URL 기록 (commit 3b22825, 2026-06-11)
@@ -51,6 +50,7 @@
 - `2026-06-11 M1-3: §10 테스트 3·4 회합주기는 연속 충 11회 간격의 평균으로 측정 — b의 e=0.03 중심차로 개별 간격이 ±0.1일 자연 요동(물리 현상)하므로 평균이 올바른 측정. 기준값·허용오차는 표 그대로`
 - `2026-06-11 M1-3: teegarden.ts에 UNITS(kmPerAU, starRadiusKm=83480, earthRadiusKm) 추가 — 불변 규칙 1에 따른 상수화 (R★ km값은 스펙 §1.1 출처)`
 - `2026-06-11 M2-2: 칭동 고도 부호 규약 — 저녁 터미네이터(기본 관측자) 고도 = +librationOffsetRad. 칭동 일출 = 고도가 +각반지름을 상향 통과(스펙 §5.2 "완전히 떠오르는 순간" 그대로). 아침 터미네이터는 부호 반전으로 M3-1에서 처리`
+- `2026-06-11 M3-1: 자전각 규약 Λ = M + π(등속), 행성 경도 동쪽 양수 — 이 조합에서 저녁 터미네이터(+90°) 항성 고도가 librationOffsetRad와 해석적으로 정확히 일치(테스트로 검증). RA/Dec→관성계는 직접 매핑(α→xz각, δ→y) [가정: 행성계-천구 정렬 미관측이라 임의]`
 
 ## KNOWN ISSUES
 
@@ -60,8 +60,8 @@
 
 ## HANDOFF NOTE (마지막 세션이 덮어쓰는 인수인계 — 항상 최신 1개만)
 
-- 마지막 작업 파일/함수: `src/components/CivicClock.tsx` (시그니처 위젯 — 다이얼/게이지/카운트다운)
-- 어디까지 했나: **M2 마일스톤 완료** — 시간 스토어·시민시간·시민 시계 위젯 전부 라이브 배포(release: M2)
-- 다음 세션 첫 행동: M3-1 수행 — 스펙 §6.1 + §7.2 읽고 `src/sim/skyCoords.ts`(행성 지평좌표 변환: 관측자 위도·터미네이터 경도 파라미터) + SurfaceScene 스캐폴드 + 모드 전환(system/surface). DoD: 항성 방향=수평선, 반항성=반대 수평선 단위테스트
-- 주의사항/함정: b는 조석고정이라 자전 위상 = 궤도 위상(meanAnomaly 활용). 칭동 고도 부호 규약(저녁 터미네이터 = +librationOffsetRad)은 DECISIONS 참조 — skyCoords가 이 규약과 일치해야 CivicClock 게이지와 모순 없음. CivicClock의 useNextEvents 캐시 패턴은 이벤트 표시 확장 시 재사용 가능
-- 테스트 상태: 36 passed / 0 failed (상수 4 + 케플러 7 + 회합 3 + julian 4 + timeStore 5 + events 2 + civicTime 11)
+- 마지막 작업 파일/함수: `src/sim/skyCoords.ts` (observerFrame / inertialDirToHorizontal / horizontalToScenePos) + `src/components/SurfaceScene.tsx`
+- 어디까지 했나: M3-1 완료 — 천구좌표 변환(칭동 규약과 해석적 일치 검증), Surface 모드 전환 + 항성 플레이스홀더가 정확한 고도·방위·각크기로 렌더
+- 다음 세션 첫 행동: M3-2 수행 — 스펙 §6.2 읽고 GiantStar 셰이더(drei shaderMaterial): 2차 limb darkening(a=0.9, b=−0.2), 절차적 granulation 노이즈, 흑점 2–4개(자전 97.56일), 채층 글로우 림. SurfaceScene의 GiantStarPlaceholder 교체. §10 테스트 2(각지름 2.47°±0.05°)·5(칭동 진폭 ±3.44°±0.1°) 작성
+- 주의사항/함정: 각지름 테스트는 starAngularRadiusRad(civicTime.ts에 이미 존재) × 2를 도 단위로 — 평균이 아닌 a 거리 기준이면 2.469° 나옴(허용오차 내). 칭동 진폭은 librationOffsetRad를 1주기 스캔해 max-min/2. 셰이더 uniform에 STAR.limbDarkening 상수 사용(재유도 금지). 플레이스홀더의 DOME_R·sin(각반지름) 스케일 방식 유지할 것
+- 테스트 상태: 44 passed / 0 failed (상수 4 + 케플러 7 + 회합 3 + julian 4 + timeStore 5 + events 2 + civicTime 11 + skyCoords 8)
