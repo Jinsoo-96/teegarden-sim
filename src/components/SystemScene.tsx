@@ -17,6 +17,7 @@ import { propagate } from "../sim/kepler";
 import { useSettingsStore } from "../state/settingsStore";
 import { useTimeStore } from "../state/timeStore";
 import PostFX from "./PostFX";
+import { planetColor } from "./planetColors";
 
 // 미확정 후보행성(172d) — 토글 시에만 표시, 원궤도 가정 [관측: 신호만 확인됨]
 const CANDIDATE_AS_PLANET: PlanetData = {
@@ -61,7 +62,11 @@ function Planet({
     <group ref={ref}>
       <mesh>
         <sphereGeometry args={[radius, 32, 16]} />
-        <meshStandardMaterial color={dim ? "#5a6172" : "#9aa3b0"} roughness={1} />
+        {/* 행성 간 크기 비율은 assumedRadiusEarth 그대로, 색은 추정 팔레트 [가정] */}
+        <meshStandardMaterial
+          color={dim ? "#5a6172" : planetColor(planet.name)}
+          roughness={1}
+        />
       </mesh>
       {showLabels && (
         <Html style={{ pointerEvents: "none" }} center distanceFactor={0.08}>

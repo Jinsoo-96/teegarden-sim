@@ -13,6 +13,7 @@ import {
 import { useSettingsStore } from "../state/settingsStore";
 import { useTimeStore } from "../state/timeStore";
 import { DOME_R } from "./SurfaceScene";
+import { planetColor } from "./planetColors";
 
 const b = PLANETS[0];
 const PLANET_DIST = DOME_R * 0.97; // 항성 디스크(0.98)보다 안쪽 — 합 때 renderOrder로 엄폐
@@ -43,8 +44,8 @@ export default function PlanetInSky({ planet }: { planet: PlanetData }) {
       {/* renderOrder 1.5: 별(1) 위, 항성 디스크(2) 아래 — 합 시 항성 뒤로 사라짐 */}
       <mesh ref={sphere} renderOrder={1.5}>
         <sphereGeometry args={[1, 32, 16]} />
-        {/* 위상 라이팅: SurfaceScene의 항성 방향 directionalLight가 비춤 */}
-        <meshStandardMaterial color="#b8aa98" roughness={0.95} />
+        {/* 위상 라이팅(광원=3034K 항성색) × 행성별 추정 색 [가정] — 각크기는 물리값 그대로 */}
+        <meshStandardMaterial color={planetColor(planet.name)} roughness={0.95} />
       </mesh>
       {showLabels && (
         <Html style={{ pointerEvents: "none" }} center distanceFactor={60}>
