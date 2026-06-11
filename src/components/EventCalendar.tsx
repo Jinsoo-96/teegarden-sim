@@ -1,5 +1,5 @@
 // 가시성 캘린더 — 스펙 §6.3/M4-2: 다음 충·합(엄폐)·칭동일출 목록 + 점프
-import { useRef } from "react";
+import { useState } from "react";
 import type { CSSProperties } from "react";
 import { PLANETS } from "../data/teegarden";
 import { findLibrationSunrise, formatCivic, jdToCivic } from "../sim/civicTime";
@@ -56,19 +56,24 @@ const numStyle: CSSProperties = {
   color: "#FFBA70",
 };
 
+function makeCache(jd: number): Cache {
+  const events = computeEvents(jd);
+  return { computedAt: jd, validUntil: events[0].jd, events };
+}
+
 export default function EventCalendar() {
   const jd = useTimeStore((s) => s.simTimeJD);
-  const cache = useRef<Cache | null>(null);
-  if (!cache.current || jd < cache.current.computedAt || jd >= cache.current.validUntil) {
-    const events = computeEvents(jd);
-    cache.current = { computedAt: jd, validUntil: events[0].jd, events };
+  // 렌더 중 상태 조정 패턴 — 이벤트 통과/되감기 시에만 재계산
+  const [cache, setCache] = useState<Cache>(() => makeCache(jd));
+  if (jd < cache.computedAt || jd >= cache.validUntil) {
+    setCache(makeCache(jd));
   }
   const setJD = useTimeStore.getState().setJD;
 
   return (
     <div style={panelStyle}>
       <div style={{ color: "#8a8f99", marginBottom: 6 }}>가시성 캘린더 — 다음 이벤트 [유도]</div>
-      {cache.current.events.map((e) => (
+      {cache.events.map((e) => (
         <div
           key={e.label}
           style={{ display: "flex", alignItems: "baseline", gap: 6, marginBottom: 4 }}
