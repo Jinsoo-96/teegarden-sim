@@ -7,6 +7,7 @@ import type { DirectionalLight } from "three";
 import GiantStar from "./GiantStar";
 import CelestialSphere from "./CelestialSphere";
 import PlanetInSky from "./PlanetInSky";
+import SkyDome from "./SkyDome";
 import { PLANETS } from "../data/teegarden";
 import {
   horizontalToScenePos,
@@ -41,8 +42,9 @@ export default function SurfaceScene() {
 
   return (
     <>
-      {/* 임시 하늘색 — M5-1 산란 셰이더가 교체 (영구 박명의 암청회) */}
-      <color attach="background" args={["#10141f"]} />
+      {/* 무대기 프리셋 폴백 배경 — 대기 있으면 SkyDome이 덮음 */}
+      <color attach="background" args={["#05060a"]} />
+      <SkyDome />
       <CelestialSphere />
       <GiantStar />
       <StarLight />
