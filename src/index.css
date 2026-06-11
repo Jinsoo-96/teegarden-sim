@@ -1,0 +1,16 @@
+/* 최소 전역 스타일 — 본격 UI 디자인은 §7.6 (M2-3 이후) */
+:root {
+  color-scheme: dark;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: #0a0c12;
+  color: #d8d4cd;
+}

@@ -7,18 +7,12 @@
 
 ## NOW (이번 세션 태스크 — 항상 1개)
 
-- [ ] **M1-1** 프로젝트 스캐폴드: Vite+React+TS, R3F/drei/zustand/leva/postprocessing/vitest 설치. `src/data/teegarden.ts`를 스펙 §2 코드블록 그대로 생성. `docs/`에 스펙 문서 배치 확인. package.json의 `"test"`는 반드시 `vitest run`(워치 금지 — CI와 세션 프로토콜이 멈추지 않게).
-  - DoD: `npm run dev` 동작 + 상수 무결성 테스트 1개 통과 (STAR.teffK===3034 등 스냅샷)
+- [ ] **M1-4** 첫 배포 (M1 마감): `npm run build` 로컬 확인 → CLAUDE.md 규약대로 dev→main 머지 → `gh run watch` 성공 → `https://<owner>.github.io/teegarden-sim/` 접속해 System View 확인 → URL을 README.md 최상단에 기록 후 dev에 커밋
+  - DoD: 배포 링크에서 M1-3 화면이 보임
 
 ## NEXT (위에서부터 순서대로 NOW로 승격)
 
 > 공통 규칙: **각 마일스톤 M{n}의 마지막 태스크에는 CLAUDE.md 'Git/배포 규약'의 dev→main 머지(=자동 배포)와 `gh run watch` 성공 확인까지 포함**된다.
-- [ ] **M1-2** 케플러 엔진 `src/sim/kepler.ts` (스펙 §3.1): solveKepler + propagate(planet, jd) → {posAU, trueAnomaly}
-  - DoD: §10 테스트 1(a값), 7(시민일), 8(칭동 위상 복귀) 통과
-- [ ] **M1-3** System View 기본: Star + Planet×3 + 궤도선, 카메라 컨트롤 (스펙 §7.2-7.3 스케일 전략)
-  - DoD: 렌더 확인 + 회합주기 자동 측정 테스트 (§10 테스트 3, 4: 8.60d / 6.04d)
-- [ ] **M1-4** 첫 배포 (M1 마감): `npm run build` 로컬 확인 → CLAUDE.md 규약대로 dev→main 머지 → `gh run watch` 성공 → `https://<owner>.github.io/teegarden-sim/` 접속해 System View 확인 → URL을 README.md 최상단에 기록 후 dev에 커밋
-  - DoD: 배포 링크에서 M1-3 화면이 보임
 - [ ] **M2-1** 시간 스토어+컨트롤러 (스펙 §3.2): simTimeJD, timeScale(1~1e6 로그), 재생/스크럽/이벤트 점프 버튼
   - DoD: UI 동작 + JD↔표시시간 변환 테스트
 - [ ] **M2-2** 시민시간 변환 모듈 (스펙 §5.2): JD → {week#, civicDay 1-5, civicTime}, 칭동 일출 = 주 시작 앵커
@@ -47,20 +41,28 @@
 
 ## DONE
 
+- [x] **M1-3** System View 기본: SystemScene(항성+행성3+케플러 궤도선+OrbitControls, 반경 과장/True scale 토글) + §10 테스트 3·4 통과 (2026-06-11)
+- [x] **M1-2** 케플러 엔진 `src/sim/kepler.ts`: solveKepler(NR, 1e-10) + propagate + librationOffsetRad. §10 테스트 1·7·8 통과 (commit e9e8715, 2026-06-11)
+- [x] **M1-1** 프로젝트 스캐폴드: Vite+React+TS + §7.1 스택 + vitest, 스펙 §2 → `src/data/teegarden.ts` 추출 생성, 상수 무결성 테스트 4개 통과 (commit 342dc31, 2026-06-11)
 - [x] **M0-1** GitHub 저장소·브랜치·배포 골격: git init → 초기 커밋 → `Jinsoo-96/teegarden-sim` public 생성 → main/dev 푸시 (initial commit, 2026-06-11)
 
 ## DECISIONS (스펙에 없어서 내린 결정 — 1줄씩 누적)
 
 - `2026-06-11 M0-1: .gitignore에 files.zip 추가 — 이유: 원본 zip은 로컬 백업용, 내용물은 이미 저장소 경로에 배치됨`
+- `2026-06-11 M1-1: 최신 안정판 채택 — Vite 8 / React 19 / three 0.184(=r160+ 충족) / vitest 4. 타입 전용 @types/three 추가. §2 상수는 awk로 스펙 코드블록에서 기계 추출(수기 금지 규칙 준수)`
+- `2026-06-11 M1-2: meanLongitudeAtEpochDeg를 평균근점이각 M0로 사용(근점 경도 0 가정) — 스펙 §3.1 의사코드 M=M0+n·Δt를 그대로 따름. 연 길이는 율리우스년 365.25d`
+- `2026-06-11 M1-3: 행성 반경 배율 ×80 채택 — 스펙 §7.3 예시 ×400은 행성(0.017AU)이 과장 항성(×8=0.0045AU)보다 커져 부적절. True scale 토글은 leva 패널 제공`
+- `2026-06-11 M1-3: §10 테스트 3·4 회합주기는 연속 충 11회 간격의 평균으로 측정 — b의 e=0.03 중심차로 개별 간격이 ±0.1일 자연 요동(물리 현상)하므로 평균이 올바른 측정. 기준값·허용오차는 표 그대로`
+- `2026-06-11 M1-3: teegarden.ts에 UNITS(kmPerAU, starRadiusKm=83480, earthRadiusKm) 추가 — 불변 규칙 1에 따른 상수화 (R★ km값은 스펙 §1.1 출처)`
 
 ## KNOWN ISSUES
 
-(없음)
+- deploy.yml의 paths 필터에 `.github/workflows/deploy.yml` 자신이 포함되어 있어, **deploy.yml을 추가/수정하는 main 푸시는 Actions를 발동시킴** (M0-1 초기 푸시에서 발동 → package.json 없어 즉시 실패 → 해당 런은 삭제 처리). M1-1 이후 package.json이 생기면 정상 동작하므로 구조 변경 불필요.
 
 ## HANDOFF NOTE (마지막 세션이 덮어쓰는 인수인계 — 항상 최신 1개만)
 
-- 마지막 작업 파일/함수: (코드 없음 — M0-1은 저장소 골격 작업)
-- 어디까지 했나: M0-1 완료 — 원격 `Jinsoo-96/teegarden-sim` 생성, main/dev 푸시됨, 현재 브랜치 dev
-- 다음 세션 첫 행동: M1-1 수행 — Vite+React+TS 스캐폴드 후 스펙 §2 코드블록을 `src/data/teegarden.ts`로 그대로 복사, vitest 상수 무결성 테스트 1개 작성
-- 주의사항/함정: package.json의 `"test"`는 반드시 `vitest run`(워치 모드 금지 — CI·세션 프로토콜이 멈춤). 스펙 §2 상수는 손으로 타이핑하지 말고 docs의 코드블록에서 복사할 것
-- 테스트 상태: N/A (npm 프로젝트 아직 없음)
+- 마지막 작업 파일/함수: `src/components/SystemScene.tsx` (Planet/OrbitLine/SystemScene) + `src/sim/synodic.test.ts`
+- 어디까지 했나: M1-3 완료 — System View 렌더(항성+행성3+궤도선+카메라+leva 토글), §10 테스트 3·4 통과, 빌드·dev 서버 정상
+- 다음 세션 첫 행동: M1-4 수행 — `npm test`/`npm run build` 확인 후 CLAUDE.md 규약대로 dev→main 머지(`release: M1`) → `gh run watch` 성공 확인 → 배포 URL 접속 확인 → README.md 최상단에 URL 기록 후 dev 커밋
+- 주의사항/함정: 배포는 main 푸시로만 발동. 빌드 시 "청크 >500kB" 경고는 three.js 번들 크기 안내(오류 아님, M6-3에서 처리). 시간 진행은 SystemScene 내 임시 클록(leva 일/초) — M2-1에서 zustand 스토어로 교체 예정
+- 테스트 상태: 14 passed / 0 failed (상수 4 + 케플러 7 + 회합주기 3)
