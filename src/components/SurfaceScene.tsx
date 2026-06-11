@@ -1,9 +1,9 @@
 // Surface View — 스펙 §6.1 관측자 / §7.3 각도 좌표 투영
 // M3-2: 거대 항성 셰이더 디스크(GiantStar). 별 배경은 M3-3, 대기 산란은 M5-1
-import { useMemo, useRef } from "react";
-import { useFrame } from "@react-three/fiber";
+import { useEffect, useMemo, useRef } from "react";
+import { useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
-import { Vector3, type DirectionalLight } from "three";
+import { Vector3, type DirectionalLight, type PerspectiveCamera } from "three";
 import { useViewStore } from "../state/viewStore";
 import GiantStar from "./GiantStar";
 import CelestialSphere from "./CelestialSphere";
@@ -24,9 +24,23 @@ import { useTimeStore } from "../state/timeStore";
 const [b, c, d] = PLANETS;
 export const DOME_R = 100; // 천구돔 반경 (씬 단위 — 모든 천체는 각도로만 배치, §7.3)
 
-// 카메라 ↔ 나침반 동기화 + "천체 보기" 부드러운 회전 (M7-2)
+// 카메라 ↔ 나침반 동기화 + "천체 보기" 부드러운 회전 (M7-2) + 휠 FOV 줌 (M8-1)
 function CameraSync() {
   const tmp = useMemo(() => new Vector3(), []);
+  const { gl, camera } = useThree();
+  useEffect(() => {
+    // 휠 = 망원경 줌 (각크기 보존 렌더라 FOV를 좁히면 천체가 커져 보임)
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      const cam = camera as PerspectiveCamera;
+      cam.fov = Math.min(75, Math.max(20, cam.fov * (1 + e.deltaY * 0.0012)));
+      cam.updateProjectionMatrix();
+      useViewStore.getState().setCameraFovDeg(Math.round(cam.fov));
+    };
+    const el = gl.domElement;
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => el.removeEventListener("wheel", onWheel);
+  }, [gl, camera]);
   useFrame(({ camera }) => {
     const store = useViewStore.getState();
     // 시선 방위 발행 (원점 응시 구조: 시선 = −position). 방위 = atan2(x, −z)

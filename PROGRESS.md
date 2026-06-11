@@ -15,7 +15,8 @@
 
 ## DONE
 
-- [x] **M7-3** 라벨 폴리싱 (M7 마감): c·d 라벨 리더선 + 수평선 아래 숨김, 항성 라벨 일몰 시 숨김. release: M7 배포 (2026-06-11)
+- [x] **M8-1** 2차 검수 대응 (하늘 어두움·크기 점검): ①플랑크 함수 정규화(560nm 기준) — 미정규화로 하늘이 ~1e-4 스케일로 검었던 버그 수정 ②Sol 마커 과대(0.3°) → 점광원(등급 규칙) ③휠 FOV 줌 20–75°(나침반 시야창 연동) — c 15.2′ 체감 확대 수단. 각크기 전수 점검: 항성 2.47°/c 15.2-4.2′/d 5.2-2.6′ 모두 정확(§10 기존 테스트). release: M8 (2026-06-11)
+- [x] **M7-3** 라벨 폴리싱 (M7 마감): c·d 라벨 리더선 + 수평선 아래 숨김, 항성 라벨 일몰 시 숨김. release: M7 배포 (commit db18b40 → main f25a678, 2026-06-11)
 - [x] **M7-2** 오리엔테이션: MiniGlobe(주/야간면·터미네이터·관측자 마커 SVG) + CompassBar(카메라 FOV 창·항성/c/d/Sol 방위 마커·지평선 아래 ▼·클릭 시 시점 회전) + viewStore/CameraSync (commit 2509141, 2026-06-11)
 - [x] **M7-1** Surface View 가시성 수정: 시작 = Surface + 칭동 일출 직후(WEEK_ZERO+0.1, 속도 5e4), 지면 130 확장(수평선 누출 차단), 능선 하향(서쪽 ±40° 추가)·암청 대비, 도시 불빛 군집화·감광, **행성별 추정 색 팔레트(양 뷰 공통, 사용자 요청)** (2026-06-11)
 - [x] **HOTFIX-1** 프로덕션 크래시(React #301 무한 재렌더) 수정: 엄폐 startJd가 합보다 앞이라 시뮬 시간이 엄폐 구간에 들어가면 HUD 캐시 불변식(이벤트 > jd)이 깨져 setState 루프 → upcomingEvents.ts로 "모든 시각 > jd" 보장 + 경계 동치(점프 착지) 방어 + 회귀 테스트 3건. release: M6-hotfix1 (2026-06-11)
@@ -62,8 +63,8 @@
 
 ## HANDOFF NOTE (마지막 세션이 덮어쓰는 인수인계 — 항상 최신 1개만)
 
-- 마지막 작업 파일/함수: PlanetInSky/GiantStar 라벨 가시성, CompassBar/MiniGlobe/viewStore(M7-2), Terrain·planetColors(M7-1)
-- 어디까지 했나: **M7 검수 개선 마일스톤 완료, release: M7 배포** — 시작=Surface+일출, 지평선 정리, 행성 색, 미니 글로브+나침반+천체 보기, 라벨 폴리싱
-- 다음 세션 첫 행동: 사용자 시각 검수 결과 청취 → 이슈를 NOW로 등록. 확인 포인트: ①첫 화면에 항성 보임 ②지평선 구분 ③나침반으로 c·d 찾기 ④미니 글로브 위치 표시 ⑤행성 색감
-- 주의사항/함정: 카메라 방위 규약 = atan2(viewDir.x, −viewDir.z). "천체 보기"는 viewStore.requestLookAt → CameraSync가 보간(OrbitControls enableDamping=false 유지 필수 — 충돌). HUD 이벤트 캐시는 반드시 upcomingEvents 경유
+- 마지막 작업 파일/함수: skyScattering(planckRel 정규화), CelestialSphere(Sol 점광원), CameraSync(휠 FOV 줌)
+- 어디까지 했나: **M8-1 배포(release: M8)** — 하늘 박명 밝기 정상화, Sol 크기 수정, FOV 줌 추가. 3차 검수 대기
+- 다음 세션 첫 행동: 사용자 검수 결과 청취 → 이슈 등록. 확인 포인트: ①서쪽 호박색 박명 그라데이션 보임? ②휠 줌으로 c 디스크 확대 체감 ③Sol이 별처럼 보임
+- 주의사항/함정: 하늘 밝기 추가 조정은 skyScattering의 uExposure(2.2)·산란계수(0.30/0.02)·경로상수(0.20/0.25)로 — 플랑크 정규화는 건드리지 말 것. 카메라 방위 규약 = atan2(x, −z). HUD 이벤트 캐시는 upcomingEvents 경유. OrbitControls enableDamping=false 유지
 - 테스트 상태: 76 passed / 0 failed (15개 파일)

@@ -14,7 +14,6 @@ import { useViewStore } from "../state/viewStore";
 
 const [b, c, d] = PLANETS;
 const RAD2DEG = 180 / Math.PI;
-const FOV_DEG = 70;
 
 const barStyle: CSSProperties = {
   position: "absolute",
@@ -45,6 +44,7 @@ export default function CompassBar() {
   const jd = useTimeStore((s) => Math.round(s.simTimeJD * 200) / 200);
   const observer = useSettingsStore((s) => s.observer);
   const camAz = useViewStore((s) => s.cameraAzimuthDeg);
+  const fovDeg = useViewStore((s) => s.cameraFovDeg);
   const requestLookAt = useViewStore.getState().requestLookAt;
 
   const sun = SKY_EVENTS.sunFromTeegarden;
@@ -79,12 +79,12 @@ export default function CompassBar() {
 
   return (
     <div style={barStyle}>
-      {/* 카메라 시야(FOV) 창 */}
+      {/* 카메라 시야(FOV) 창 — 휠 줌 연동 */}
       <div
         style={{
           position: "absolute",
-          left: pct(camAz - FOV_DEG / 2),
-          width: `${FOV_DEG / 3.6}%`,
+          left: pct(camAz - fovDeg / 2),
+          width: `${fovDeg / 3.6}%`,
           top: 0,
           bottom: 0,
           background: "rgba(255, 186, 112, 0.10)",
