@@ -3,17 +3,12 @@
 import { useState } from "react";
 import type { CSSProperties } from "react";
 import { PLANETS } from "../data/teegarden";
-import {
-  findLibrationSunrise,
-  jdToCivic,
-  librationAltitudeRad,
-  starAngularRadiusRad,
-} from "../sim/civicTime";
-import { nextOppositionJd } from "../sim/events";
+import { jdToCivic, librationAltitudeRad, starAngularRadiusRad } from "../sim/civicTime";
+import { upcomingBasics } from "../sim/upcomingEvents";
 import { useFlareStore } from "../state/flareStore";
 import { useTimeStore } from "../state/timeStore";
 
-const [b, c, d] = PLANETS;
+const [b] = PLANETS;
 const RAD2DEG = 180 / Math.PI;
 const MAX_ALT_RAD = 2 * b.eccentricity; // 칭동 진폭 ≈ ±2e rad ≈ ±3.44° (§4)
 const GAUGE_HALF_RAD = 70 / RAD2DEG; // 게이지 호의 절반각 (±70°)
@@ -62,12 +57,8 @@ interface EventCache {
 }
 
 function computeNextEvents(jd: number): EventCache {
-  return {
-    computedAt: jd,
-    sunrise: findLibrationSunrise(jd),
-    cOpp: nextOppositionJd(b, c, jd),
-    dOpp: nextOppositionJd(b, d, jd),
-  };
+  // upcomingBasics가 "모든 시각 > jd" 불변식 보장 — 무한 재렌더 방지 (회귀 테스트 참조)
+  return { computedAt: jd, ...upcomingBasics(jd) };
 }
 
 // 다음 이벤트 캐시 — 이벤트를 지나치거나 시간을 되감을 때만 재계산

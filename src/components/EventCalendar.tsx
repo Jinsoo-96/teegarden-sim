@@ -1,38 +1,14 @@
 // 가시성 캘린더 — 스펙 §6.3/M4-2: 다음 충·합(엄폐)·칭동일출 목록 + 점프
 import { useState } from "react";
 import type { CSSProperties } from "react";
-import { PLANETS } from "../data/teegarden";
-import { findLibrationSunrise, formatCivic, jdToCivic } from "../sim/civicTime";
-import { nextOccultation, nextOppositionJd } from "../sim/events";
+import { formatCivic, jdToCivic } from "../sim/civicTime";
+import { upcomingCalendar, type CalendarEvent } from "../sim/upcomingEvents";
 import { useTimeStore } from "../state/timeStore";
-
-const [b, c, d] = PLANETS;
-
-interface CalEvent {
-  jd: number;
-  label: string;
-  note?: string;
-}
 
 interface Cache {
   computedAt: number;
   validUntil: number;
-  events: CalEvent[];
-}
-
-function computeEvents(jd: number): CalEvent[] {
-  const sunrise = findLibrationSunrise(jd);
-  const cOpp = nextOppositionJd(b, c, jd);
-  const dOpp = nextOppositionJd(b, d, jd);
-  const cOcc = nextOccultation(b, c, jd);
-  const dOcc = nextOccultation(b, d, jd);
-  return [
-    { jd: sunrise, label: "칭동 일출", note: "주 시작 (D1)" },
-    { jd: cOpp, label: "c 충", note: "보름 c · 15.2′ · V−6.5" },
-    { jd: cOcc.startJd, label: "c 엄폐 시작", note: `항성 뒤 ${cOcc.durationHours.toFixed(1)}h` },
-    { jd: dOpp, label: "d 충", note: "5.2′ · V−3.0" },
-    { jd: dOcc.startJd, label: "d 엄폐 시작", note: `항성 뒤 ${dOcc.durationHours.toFixed(1)}h` },
-  ].sort((a, x) => a.jd - x.jd);
+  events: CalendarEvent[];
 }
 
 const panelStyle: CSSProperties = {
@@ -57,7 +33,8 @@ const numStyle: CSSProperties = {
 };
 
 function makeCache(jd: number): Cache {
-  const events = computeEvents(jd);
+  // upcomingCalendar가 "모든 시각 > jd" 불변식 보장 — 2026-06-11 무한 재렌더 크래시 수정
+  const events = upcomingCalendar(jd);
   return { computedAt: jd, validUntil: events[0].jd, events };
 }
 
