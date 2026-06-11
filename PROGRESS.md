@@ -7,8 +7,7 @@
 
 ## NOW (이번 세션 태스크 — 항상 1개)
 
-- [ ] **M7-3** 라벨 폴리싱 (M7 마감 — release: M7): c·d 라벨 리더선 + 수평선 아래 숨김, 항성 라벨 위치 보정, 크기 일관화
-  - DoD: 라벨-천체 시각 연결 명확 (사용자 확인)
+(M7 검수 개선 완료 — 다음 이슈는 사용자 시각 검수 결과로 등록)
 
 ## NEXT (위에서부터 순서대로 NOW로 승격)
 
@@ -16,7 +15,8 @@
 
 ## DONE
 
-- [x] **M7-2** 오리엔테이션: MiniGlobe(주/야간면·터미네이터·관측자 마커 SVG) + CompassBar(카메라 FOV 창·항성/c/d/Sol 방위 마커·지평선 아래 ▼·클릭 시 시점 회전) + viewStore/CameraSync (2026-06-11)
+- [x] **M7-3** 라벨 폴리싱 (M7 마감): c·d 라벨 리더선 + 수평선 아래 숨김, 항성 라벨 일몰 시 숨김. release: M7 배포 (2026-06-11)
+- [x] **M7-2** 오리엔테이션: MiniGlobe(주/야간면·터미네이터·관측자 마커 SVG) + CompassBar(카메라 FOV 창·항성/c/d/Sol 방위 마커·지평선 아래 ▼·클릭 시 시점 회전) + viewStore/CameraSync (commit 2509141, 2026-06-11)
 - [x] **M7-1** Surface View 가시성 수정: 시작 = Surface + 칭동 일출 직후(WEEK_ZERO+0.1, 속도 5e4), 지면 130 확장(수평선 누출 차단), 능선 하향(서쪽 ±40° 추가)·암청 대비, 도시 불빛 군집화·감광, **행성별 추정 색 팔레트(양 뷰 공통, 사용자 요청)** (2026-06-11)
 - [x] **HOTFIX-1** 프로덕션 크래시(React #301 무한 재렌더) 수정: 엄폐 startJd가 합보다 앞이라 시뮬 시간이 엄폐 구간에 들어가면 HUD 캐시 불변식(이벤트 > jd)이 깨져 setState 루프 → upcomingEvents.ts로 "모든 시각 > jd" 보장 + 경계 동치(점프 착지) 방어 + 회귀 테스트 3건. release: M6-hotfix1 (2026-06-11)
 - [x] **M6-3** 성능 패스 (M6 마감): lint 0 에러(ref 캐시 → 렌더 중 상태 조정 패턴 수정), 모바일 quality 프리셋(터치 기기 파장샘플 4), 청크 한도 명시. 60fps 실측은 사용자 검수 대기. release: M6 배포 (commit 410e80b → main bfb8cfb, 2026-06-11)
@@ -62,8 +62,8 @@
 
 ## HANDOFF NOTE (마지막 세션이 덮어쓰는 인수인계 — 항상 최신 1개만)
 
-- 마지막 작업 파일/함수: Terrain(능선/지면/도시), timeStore·settingsStore 기본값, `src/components/planetColors.ts`
-- 어디까지 했나: M7-1 완료(dev만, 미배포) — 시작 화면이 Surface+일출 직후, 지평선 정리, 행성 추정 색 양 뷰 적용
-- 다음 세션 첫 행동: M7-2 수행 — MiniGlobe(SVG 또는 소형 Canvas: 주/야간면 반구 + 터미네이터 대원 + 관측자 마커) + CompassBar(카메라 yaw는 OrbitControls의 getAzimuthalAngle 활용, 천체 방위는 inertialDirToHorizontal 재사용) + "천체 보기" 버튼(controls.setAzimuthalAngle/setPolarAngle 또는 camera 보간)
-- 주의사항/함정: 카메라 yaw→방위 변환: 씬 x=동/−z=북이므로 방위 = atan2(viewDir.x, −viewDir.z). HUD 이벤트 캐시는 반드시 upcomingEvents 모듈 경유. M7-1 변경은 아직 main 미반영 — M7-3 완료 시 release: M7로 일괄 배포(사용자가 중간 배포 요청 시 즉시)
+- 마지막 작업 파일/함수: PlanetInSky/GiantStar 라벨 가시성, CompassBar/MiniGlobe/viewStore(M7-2), Terrain·planetColors(M7-1)
+- 어디까지 했나: **M7 검수 개선 마일스톤 완료, release: M7 배포** — 시작=Surface+일출, 지평선 정리, 행성 색, 미니 글로브+나침반+천체 보기, 라벨 폴리싱
+- 다음 세션 첫 행동: 사용자 시각 검수 결과 청취 → 이슈를 NOW로 등록. 확인 포인트: ①첫 화면에 항성 보임 ②지평선 구분 ③나침반으로 c·d 찾기 ④미니 글로브 위치 표시 ⑤행성 색감
+- 주의사항/함정: 카메라 방위 규약 = atan2(viewDir.x, −viewDir.z). "천체 보기"는 viewStore.requestLookAt → CameraSync가 보간(OrbitControls enableDamping=false 유지 필수 — 충돌). HUD 이벤트 캐시는 반드시 upcomingEvents 경유
 - 테스트 상태: 76 passed / 0 failed (15개 파일)
