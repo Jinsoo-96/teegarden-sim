@@ -7,14 +7,12 @@
 
 ## NOW (이번 세션 태스크 — 항상 1개)
 
-- [ ] **M2-1** 시간 스토어+컨트롤러 (스펙 §3.2): simTimeJD, timeScale(1~1e6 로그), 재생/스크럽/이벤트 점프 버튼
-  - DoD: UI 동작 + JD↔표시시간 변환 테스트
+- [ ] **M2-2** 시민시간 변환 모듈 (스펙 §5.2): JD → {week#, civicDay 1-5, civicTime}, 칭동 일출 = 주 시작 앵커
+  - DoD: §10 테스트 7, 8 + 경계값 테스트
 
 ## NEXT (위에서부터 순서대로 NOW로 승격)
 
 > 공통 규칙: **각 마일스톤 M{n}의 마지막 태스크에는 CLAUDE.md 'Git/배포 규약'의 dev→main 머지(=자동 배포)와 `gh run watch` 성공 확인까지 포함**된다.
-- [ ] **M2-2** 시민시간 변환 모듈 (스펙 §5.2): JD → {week#, civicDay 1-5, civicTime}, 칭동 일출 = 주 시작 앵커
-  - DoD: §10 테스트 7, 8 + 경계값 테스트
 - [ ] **M2-3** 시민 시계 HUD 위젯 (스펙 §5.3 + §7.6 시그니처 디자인): 원형 시계 + 칭동 고도 게이지 + 이벤트 카운트다운
   - DoD: 시각 확인, 시간 가속 시 동기화
 - [ ] **M3-1** SurfaceScene 스캐폴드 + 천구좌표 유틸 `src/sim/skyCoords.ts`: 행성 지평좌표(고도/방위) ↔ 궤도면/RA·Dec 변환, 관측자(위도, 터미네이터 경도) 파라미터화
@@ -39,7 +37,8 @@
 
 ## DONE
 
-- [x] **M1-4** 첫 배포 (M1 마감): dev→main 머지(release: M1, d2e3ac0) → Pages 수동 활성화 후 Actions 성공 → https://jinsoo-96.github.io/teegarden-sim/ 라이브 확인 → README에 URL 기록 (2026-06-11)
+- [x] **M2-1** 시간 스토어+컨트롤러: zustand 스토어(§3.2 적분 공식) + HUD(재생/일시정지·로그 속도·스크럽·충 점프 버튼) + JD↔UTC 변환, 테스트 11건 추가 (2026-06-11)
+- [x] **M1-4** 첫 배포 (M1 마감): dev→main 머지(release: M1, d2e3ac0) → Pages 수동 활성화 후 Actions 성공 → https://jinsoo-96.github.io/teegarden-sim/ 라이브 확인 → README에 URL 기록 (commit 3b22825, 2026-06-11)
 - [x] **M1-3** System View 기본: SystemScene(항성+행성3+케플러 궤도선+OrbitControls, 반경 과장/True scale 토글) + §10 테스트 3·4 통과 (commit 9ca6f93, 2026-06-11)
 - [x] **M1-2** 케플러 엔진 `src/sim/kepler.ts`: solveKepler(NR, 1e-10) + propagate + librationOffsetRad. §10 테스트 1·7·8 통과 (commit e9e8715, 2026-06-11)
 - [x] **M1-1** 프로젝트 스캐폴드: Vite+React+TS + §7.1 스택 + vitest, 스펙 §2 → `src/data/teegarden.ts` 추출 생성, 상수 무결성 테스트 4개 통과 (commit 342dc31, 2026-06-11)
@@ -62,8 +61,8 @@
 
 ## HANDOFF NOTE (마지막 세션이 덮어쓰는 인수인계 — 항상 최신 1개만)
 
-- 마지막 작업 파일/함수: README.md(배포 URL), `.github/workflows/deploy.yml`(액션 메이저 업그레이드)
-- 어디까지 했나: **M1 마일스톤 완료** — https://jinsoo-96.github.io/teegarden-sim/ 라이브 (System View). main = release: M1 (d2e3ac0)
-- 다음 세션 첫 행동: M2-1 수행 — 스펙 §3.2 읽고 zustand 시간 스토어(simTimeJD, timeScale 1~1e6 로그, paused) + 재생/스크럽 UI 작성, SystemScene의 임시 leva 클록을 스토어로 교체, JD↔UTC 변환 테스트 작성
-- 주의사항/함정: SystemScene의 `daysPerSec` leva 컨트롤과 `SimClock` ref는 M2-1에서 제거 대상. JD↔UTC 변환은 JD 2440587.5 = 1970-01-01T00:00Z(Unix epoch) 기준이 간단. Pages 활성화는 이미 완료 상태이므로 건드릴 필요 없음
-- 테스트 상태: 14 passed / 0 failed (상수 4 + 케플러 7 + 회합주기 3)
+- 마지막 작업 파일/함수: `src/state/timeStore.ts` + `src/components/TimeController.tsx` + `src/sim/julian.ts`/`events.ts`
+- 어디까지 했나: M2-1 완료 — zustand 시간 스토어(§3.2 적분식), HUD 컨트롤러(재생/속도 로그슬라이더/스크럽/다음 c·d 충 점프), SystemScene 임시 클록 제거
+- 다음 세션 첫 행동: M2-2 수행 — 스펙 §5.2 읽고 `src/sim/civicTime.ts` 작성: JD → {week#, civicDay 1–5, civicTime}, 주 시작 앵커 = 칭동 일출. §10 테스트 7·8 + 경계값 테스트
+- 주의사항/함정: 칭동 일출 앵커는 kepler.librationOffsetRad 활용(최대 고도 = 오프셋 최대 시점 근방). 시민시각 표시 자리는 TimeController에 "시민시각 (M2-2 예정)" 플레이스홀더로 잡아둠. CIVIC_TIME 상수(orbitHours/civicDaysPerOrbit/civicDayHours) 사용 — 재유도 금지
+- 테스트 상태: 25 passed / 0 failed (상수 4 + 케플러 7 + 회합주기 3 + julian 4 + timeStore 5 + events 2)

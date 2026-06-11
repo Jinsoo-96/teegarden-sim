@@ -7,6 +7,7 @@ import { useControls } from "leva";
 import type { Mesh } from "three";
 import { EPOCH_JD, PLANETS, STAR, UNITS, type PlanetData } from "../data/teegarden";
 import { propagate } from "../sim/kepler";
+import { useTimeStore } from "../state/timeStore";
 
 const STAR_RADIUS_AU = UNITS.starRadiusKm / UNITS.kmPerAU; // ≈ 5.58e-4 (스펙 §7.3의 0.00056)
 const EARTH_RADIUS_AU = UNITS.earthRadiusKm / UNITS.kmPerAU;
@@ -15,17 +16,11 @@ const EARTH_RADIUS_AU = UNITS.earthRadiusKm / UNITS.kmPerAU;
 const STAR_SCALE = 8;
 const PLANET_SCALE = 80;
 
-interface SimClock {
-  jd: number;
-}
-
 function Planet({
   planet,
-  clock,
   trueScale,
 }: {
   planet: PlanetData;
-  clock: SimClock;
   trueScale: boolean;
 }) {
   const ref = useRef<Mesh>(null);
@@ -33,7 +28,7 @@ function Planet({
     planet.assumedRadiusEarth * EARTH_RADIUS_AU * (trueScale ? 1 : PLANET_SCALE);
   useFrame(() => {
     if (!ref.current) return;
-    const { posAU } = propagate(planet, clock.jd);
+    const { posAU } = propagate(planet, useTimeStore.getState().simTimeJD);
     ref.current.position.set(posAU[0], posAU[1], posAU[2]);
   });
   return (
@@ -58,13 +53,12 @@ function OrbitLine({ planet }: { planet: PlanetData }) {
 }
 
 export default function SystemScene() {
-  const clock = useRef<SimClock>({ jd: EPOCH_JD }).current;
-  const { daysPerSec, trueScale } = useControls({
-    daysPerSec: { value: 1, min: 0, max: 10, label: "일/초 (M2-1에서 교체)" },
+  const { trueScale } = useControls({
     trueScale: { value: false, label: "True scale" },
   });
+  // rAF 델타 적분 — 스토어가 paused/timeScale 처리 (§3.2)
   useFrame((_, delta) => {
-    clock.jd += delta * daysPerSec;
+    useTimeStore.getState().advance(delta * 1000);
   });
 
   const starRadius = STAR_RADIUS_AU * (trueScale ? 1 : STAR_SCALE);
@@ -82,7 +76,7 @@ export default function SystemScene() {
       {PLANETS.map((p) => (
         <group key={p.name}>
           <OrbitLine planet={p} />
-          <Planet planet={p} clock={clock} trueScale={trueScale} />
+          <Planet planet={p} trueScale={trueScale} />
         </group>
       ))}
       <OrbitControls makeDefault minDistance={0.002} maxDistance={1} />
