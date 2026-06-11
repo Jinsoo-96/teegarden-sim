@@ -90,6 +90,7 @@ void main() {
     float hs = smoothstep(cos(0.22), cos(0.05), dot(f, normalize(uFlareDir)));
     col += vec3(0.82, 0.88, 1.0) * hs * uFlare * 1.6;
   }
-  gl_FragColor = vec4(col, 1.0);
+  // HDR 부스트 (§7.5): 블룸 임계(1.0) 초과시키되 ACES 롤오프가 디스크 질감 보존
+  gl_FragColor = vec4(col * 1.6, 1.0);
 }
 `;

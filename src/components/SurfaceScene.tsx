@@ -9,6 +9,7 @@ import CelestialSphere from "./CelestialSphere";
 import PlanetInSky from "./PlanetInSky";
 import SkyDome from "./SkyDome";
 import FlareSystem from "./FlareSystem";
+import PostFX from "./PostFX";
 import { PLANETS } from "../data/teegarden";
 import {
   horizontalToScenePos,
@@ -52,6 +53,7 @@ export default function SurfaceScene() {
       <PlanetInSky planet={c} />
       <PlanetInSky planet={d} />
       <FlareSystem />
+      <PostFX />
       {/* 지면: 수평선 실루엣 임시판 (M6-1에서 지형으로 교체) */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.15, 0]}>
         <circleGeometry args={[DOME_R * 2, 64]} />

@@ -7,19 +7,18 @@
 
 ## NOW (이번 세션 태스크 — 항상 1개)
 
-- [ ] **M5-3** 광학 캘리브레이션: 등급→HDR 변환 유틸(기준 항성 V−22.3), selective bloom(항성/플레어/c·d만), ACES 톤매핑 (스펙 §7.4-7.5) — **M5 마감: dev→main 머지(release: M5) + `gh run watch` 성공 확인 포함**
-  - DoD: c 충 장면에서 원반 질감 유지(점광원 글레어 금지) 시각 검수
+- [ ] **M6-1** 지형·연출: 저폴리 지평선, 도시 인공조명(§5.1 근거), 야간면 방향 구름/번개 (스펙 §6.6)
 
 ## NEXT (위에서부터 순서대로 NOW로 승격)
 
 > 공통 규칙: **각 마일스톤 M{n}의 마지막 태스크에는 CLAUDE.md 'Git/배포 규약'의 dev→main 머지(=자동 배포)와 `gh run watch` 성공 확인까지 포함**된다.
-- [ ] **M6-1** 지형·연출: 저폴리 지평선, 도시 인공조명(§5.1 근거), 야간면 방향 구름/번개 (스펙 §6.6)
 - [ ] **M6-2** Assumptions 패널(스펙 §8 목록 그대로) + 천체 라벨/교육 오버레이 + 설정(관측자 위도/터미네이터 선택, 후보행성 토글)
 - [ ] **M6-3** 성능 패스: 60fps@1080p 확인, 모바일 quality 프리셋, 코드 정리 (스펙 §7.5)
 
 ## DONE
 
-- [x] **M5-2** 플레어 시스템: flareStore(푸아송 λ=0.026/일, 130–600s 엔벨로프) + 항성 핫스팟·증광 + 하늘 10,000K 가산 + leva 디버그 트리거 + 발생 로그 + 시계 경보. 테스트 4건 (2026-06-11)
+- [x] **M5-3** 광학 캘리브레이션 (M5 마감): photometry(등급→HDR, V−22.3 기준) + PostFX(Bloom 휘도임계 1.0 + ACES) + 항성 HDR 부스트. 원반 질감 시각 검수는 사용자 대기. release: M5 배포 (2026-06-11)
+- [x] **M5-2** 플레어 시스템: flareStore(푸아송 λ=0.026/일, 130–600s 엔벨로프) + 항성 핫스팟·증광 + 하늘 10,000K 가산 + leva 디버그 트리거 + 발생 로그 + 시계 경보. 테스트 4건 (commit a1f4ed6, 2026-06-11)
 - [x] **M5-1** 대기산란 스카이돔: skyScattering 셰이더(3034K 플랑크 파장샘플 → Rayleigh λ⁻⁴+Mie HG → CIE XYZ→sRGB), 프리셋 3종 + quality 4/8/16 leva. 시각 확인은 사용자 검수 대기 (commit ec377c7, 2026-06-11)
 - [x] **M4-2** 이벤트 예측기 + 가시성 캘린더 (M4 마감): nextConjunctionJd/nextOccultation(이분 탐색) + EventCalendar HUD(점프 버튼·시민시각 병기). 예측 = 실측 1분 이내 검증. release: M4 배포 (commit 978ea2c → main e22a958, 2026-06-11)
 - [x] **M4-1** c/d 하늘 객체: planetVis.ts(위상각·조명률·각지름·등급, §6.3 공식 그대로) + PlanetInSky(위상 라이팅 구체) + StarLight. §10 테스트 6 포함 §6.3 표 6지점 + 위상 범위 검증 10건 통과 (commit bee3df8, 2026-06-11)
@@ -57,8 +56,8 @@
 
 ## HANDOFF NOTE (마지막 세션이 덮어쓰는 인수인계 — 항상 최신 1개만)
 
-- 마지막 작업 파일/함수: `src/sim/events.ts`(nextConjunctionJd/nextOccultation) + `src/components/EventCalendar.tsx`
-- 어디까지 했나: **M4 마일스톤 완료** — c·d 하늘 객체 + 이벤트 예측기 + 가시성 캘린더 라이브 배포(release: M4)
-- 다음 세션 첫 행동: M5-1 수행 — 스펙 §6.5 읽고 skyScattering 셰이더: 돔 BackSide 구에 3034K 플랑크 분포(8–16 파장 샘플) → 파장별 Rayleigh(λ⁻⁴)+Mie 단일산란 → XYZ→sRGB. uniform: sunDir(항성 씬 방향), atmosPreset(1bar/0.1bar/무대기), sampleCount(4/8/16). leva 프리셋 토글
-- 주의사항/함정: 항성 씬 방향은 GiantStar와 동일 파이프라인(starDirectionFromPlanet→horizontal→scene) 재사용. 배경 <color>와 지면색은 셰이더 돔으로 대체/조화 필요. 별필드(renderOrder 1)가 하늘 돔 위에 보이려면 돔 renderOrder 0 + depthWrite false. CIE XYZ 적분은 단순 3밴드 근사도 허용(시각 확인이 DoD — 정밀 테스트 없음)
-- 테스트 상태: 66 passed / 0 failed (+ events 합/엄폐 4)
+- 마지막 작업 파일/함수: `src/sim/photometry.ts` + `src/components/PostFX.tsx`(양 씬 장착) + starSurface HDR 부스트
+- 어디까지 했나: **M5 마일스톤 완료** — 대기산란 하늘 + 플레어 + Bloom/ACES 라이브 배포(release: M5). 시각 검수(박명 그라데이션·원반 질감)는 사용자 확인 대기
+- 다음 세션 첫 행동: M6-1 수행 — 스펙 §6.6 읽고 Terrain 컴포넌트: 저폴리 지평선 실루엣(능선 띠), 도시 불빛 점광(§5.1 인공조명 근거 — 터미네이터 도시), 야간면(동쪽) 방향 구름/번개 스프라이트. 시각 연출 태스크라 단위테스트 부담 없음
+- 주의사항/함정: 지면은 현재 SurfaceScene의 평면 원반(circleGeometry) — Terrain으로 대체. 씬 좌표: 서(−x)=항성/주간면, 동(+x)=야간면(§6.6 구름·번개는 +x 수평선 쪽). 도시 불빛은 카메라 주변 지표(반경 ~30 유닛)에 점광 클러스터. PostFX 블룸 임계 1.0 주의 — 불빛이 HDR>1이면 블룸 됨(의도적 활용 가능)
+- 테스트 상태: 73 passed / 0 failed (+ flare 4, photometry 3)

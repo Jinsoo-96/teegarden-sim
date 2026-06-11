@@ -8,6 +8,7 @@ import type { Mesh } from "three";
 import { EPOCH_JD, PLANETS, STAR, UNITS, type PlanetData } from "../data/teegarden";
 import { propagate } from "../sim/kepler";
 import { useTimeStore } from "../state/timeStore";
+import PostFX from "./PostFX";
 
 const STAR_RADIUS_AU = UNITS.starRadiusKm / UNITS.kmPerAU; // ≈ 5.58e-4 (스펙 §7.3의 0.00056)
 const EARTH_RADIUS_AU = UNITS.earthRadiusKm / UNITS.kmPerAU;
@@ -80,6 +81,7 @@ export default function SystemScene() {
         </group>
       ))}
       <OrbitControls makeDefault minDistance={0.002} maxDistance={1} />
+      <PostFX />
     </>
   );
 }

@@ -28,7 +28,8 @@ describe("강도 엔벨로프 (§6.2 라이프사이클)", () => {
     const f = useFlareStore.getState().active!;
     const at = (frac: number) => flareIntensity(f, EPOCH_JD + (frac * f.durationSec) / 86400);
     expect(at(0)).toBe(0);
-    expect(at(0.1)).toBeCloseTo(1, 6);
+    // JD(~2.46e6)에 초를 더하는 fp 오차로 t=0.1 경계가 ±2e-6 흔들림 → 정밀도 3자리면 충분
+    expect(at(0.1)).toBeCloseTo(1, 3);
     expect(at(0.5)).toBeLessThan(at(0.2));
     expect(at(1.01)).toBe(0);
     expect(flareIntensity(null, EPOCH_JD)).toBe(0);
