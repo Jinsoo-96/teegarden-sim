@@ -7,14 +7,12 @@
 
 ## NOW (이번 세션 태스크 — 항상 1개)
 
-- [ ] **M3-2** 거대 항성 디스크: §6.2 셰이더(limb darkening, granulation, 흑점) + §4 칭동 고도 반영
-  - DoD: §10 테스트 2(각지름 2.47°), 5(칭동 ±3.44°)
+- [ ] **M3-3** 배경 천구: HYG v3 전처리 스크립트(`scripts/prepStars.ts`, V≤6.5) + Points 별필드 + 태양 마커(천칭자리, V2.75) + 4.90634일 일주운동 (스펙 §6.4) — **M3 마감: dev→main 머지(release: M3) + `gh run watch` 성공 확인 포함**
+  - DoD: 별 ~9k개 로드, 태양 라벨 토글
 
 ## NEXT (위에서부터 순서대로 NOW로 승격)
 
 > 공통 규칙: **각 마일스톤 M{n}의 마지막 태스크에는 CLAUDE.md 'Git/배포 규약'의 dev→main 머지(=자동 배포)와 `gh run watch` 성공 확인까지 포함**된다.
-- [ ] **M3-3** 배경 천구: HYG v3 전처리 스크립트(`scripts/prepStars.ts`, V≤6.5) + Points 별필드 + 태양 마커(천칭자리, V2.75) + 4.90634일 일주운동 (스펙 §6.4)
-  - DoD: 별 ~9k개 로드, 태양 라벨 토글
 - [ ] **M4-1** c/d 하늘 객체: 실시간 위치·위상(항상 gibbous 91%/97%+)·등급·각크기, 표면밝기 보존 원반 렌더 (스펙 §6.3)
   - DoD: 충/구상/합 3지점 값이 §6.3 표와 일치하는 테스트 (c: 15.2′/−6.5, 8.0′/−5.0, 4.2′/−3.7)
 - [ ] **M4-2** 이벤트 예측기 + 가시성 캘린더: 다음 충/합/엄폐/칭동일출 계산, HUD 캘린더, 엄폐 연출(합 시 항성 뒤 ~1.4h) (스펙 §6.3)
@@ -31,7 +29,8 @@
 
 ## DONE
 
-- [x] **M3-1** 천구좌표 유틸 `src/sim/skyCoords.ts`(지평좌표/RA·Dec/관측자 파라미터) + SurfaceScene 스캐폴드(돔·지면·항성 플레이스홀더) + ModeSwitch + settingsStore. DoD 테스트 8건 통과 (2026-06-11)
+- [x] **M3-2** 거대 항성 디스크: starSurface 셰이더(2차 limb darkening + fbm 쌀알무늬 + 몸체고정 흑점 3개 + 채층 글로우 림) + GiantStar 컴포넌트(칭동 고도·각크기 반영). §10 테스트 2·5 통과 (2026-06-11)
+- [x] **M3-1** 천구좌표 유틸 `src/sim/skyCoords.ts`(지평좌표/RA·Dec/관측자 파라미터) + SurfaceScene 스캐폴드(돔·지면·항성 플레이스홀더) + ModeSwitch + settingsStore. DoD 테스트 8건 통과 (commit 151319b, 2026-06-11)
 - [x] **M2-3** 시민 시계 위젯 (M2 마감): SVG 원형 24시민시 다이얼 + 칭동 고도 게이지(완전일출 눈금·항성 마커) + 주간 5칸 바 + 일출/c충/d충 카운트다운. release: M2 배포 (commit d1edb5f → main b4a9c54, 2026-06-11)
 - [x] **M2-2** 시민시간 변환 모듈 `src/sim/civicTime.ts`: 칭동 일출 앵커(WEEK_ZERO_JD) + jdToCivic(week/civicDay/시분초) + HUD 시민시각 표시. §10 테스트 7·8 + 경계값 11건 (commit 1f903e7, 2026-06-11)
 - [x] **M2-1** 시간 스토어+컨트롤러: zustand 스토어(§3.2 적분 공식) + HUD(재생/일시정지·로그 속도·스크럽·충 점프 버튼) + JD↔UTC 변환, 테스트 11건 추가 (commit ffd6aad, 2026-06-11)
@@ -51,6 +50,7 @@
 - `2026-06-11 M1-3: teegarden.ts에 UNITS(kmPerAU, starRadiusKm=83480, earthRadiusKm) 추가 — 불변 규칙 1에 따른 상수화 (R★ km값은 스펙 §1.1 출처)`
 - `2026-06-11 M2-2: 칭동 고도 부호 규약 — 저녁 터미네이터(기본 관측자) 고도 = +librationOffsetRad. 칭동 일출 = 고도가 +각반지름을 상향 통과(스펙 §5.2 "완전히 떠오르는 순간" 그대로). 아침 터미네이터는 부호 반전으로 M3-1에서 처리`
 - `2026-06-11 M3-1: 자전각 규약 Λ = M + π(등속), 행성 경도 동쪽 양수 — 이 조합에서 저녁 터미네이터(+90°) 항성 고도가 librationOffsetRad와 해석적으로 정확히 일치(테스트로 검증). RA/Dec→관성계는 직접 매핑(α→xz각, δ→y) [가정: 행성계-천구 정렬 미관측이라 임의]`
+- `2026-06-11 M3-2: 흑점 3개 고정 배치(스펙 "2–4개" 범위 내 중간값), 셰이더는 .frag 파일 대신 TS 문자열 모듈(src/shaders/)로 관리 — vite 플러그인 추가 없이 §7.1 스택 유지. 항성 디스크 = 빌보드 평면(r=1 림, 1.3까지 채층 글로우)`
 
 ## KNOWN ISSUES
 
@@ -60,8 +60,8 @@
 
 ## HANDOFF NOTE (마지막 세션이 덮어쓰는 인수인계 — 항상 최신 1개만)
 
-- 마지막 작업 파일/함수: `src/sim/skyCoords.ts` (observerFrame / inertialDirToHorizontal / horizontalToScenePos) + `src/components/SurfaceScene.tsx`
-- 어디까지 했나: M3-1 완료 — 천구좌표 변환(칭동 규약과 해석적 일치 검증), Surface 모드 전환 + 항성 플레이스홀더가 정확한 고도·방위·각크기로 렌더
-- 다음 세션 첫 행동: M3-2 수행 — 스펙 §6.2 읽고 GiantStar 셰이더(drei shaderMaterial): 2차 limb darkening(a=0.9, b=−0.2), 절차적 granulation 노이즈, 흑점 2–4개(자전 97.56일), 채층 글로우 림. SurfaceScene의 GiantStarPlaceholder 교체. §10 테스트 2(각지름 2.47°±0.05°)·5(칭동 진폭 ±3.44°±0.1°) 작성
-- 주의사항/함정: 각지름 테스트는 starAngularRadiusRad(civicTime.ts에 이미 존재) × 2를 도 단위로 — 평균이 아닌 a 거리 기준이면 2.469° 나옴(허용오차 내). 칭동 진폭은 librationOffsetRad를 1주기 스캔해 max-min/2. 셰이더 uniform에 STAR.limbDarkening 상수 사용(재유도 금지). 플레이스홀더의 DOME_R·sin(각반지름) 스케일 방식 유지할 것
-- 테스트 상태: 44 passed / 0 failed (상수 4 + 케플러 7 + 회합 3 + julian 4 + timeStore 5 + events 2 + civicTime 11 + skyCoords 8)
+- 마지막 작업 파일/함수: `src/shaders/starSurface.ts` + `src/components/GiantStar.tsx`
+- 어디까지 했나: M3-2 완료 — 항성 셰이더 디스크(limb darkening·쌀알무늬·흑점·채층 림)가 Surface View에서 칭동 고도로 승강, §10 테스트 2·5 통과
+- 다음 세션 첫 행동: M3-3 수행 — 스펙 §6.4 읽고 ①`scripts/prepStars.ts`: HYG v3 CSV(github.com/astronexus/HYG-Database) 다운로드→V≤6.5 필터→`public/stars.json`(ra/dec/mag/bv ~9k개) ②CelestialSphere 컴포넌트: THREE.Points + 등급→크기/밝기 + B−V→색, raDecToInertialDir(skyCoords 기존 함수)로 방향→돔 투영, 자전에 따른 일주운동(observerFrame이 자동 처리) ③태양 마커: SKY_EVENTS.sunFromTeegarden(RA 14.883h, Dec −16.88°, V2.75) + 라벨 토글. **M3 마감: 완료 후 dev→main 머지(release: M3) + gh run watch + 배포 확인**
+- 주의사항/함정: HYG 데이터 다운로드는 네트워크 필요 — curl로 받아서 전처리 후 public/에 저장(원본 CSV는 .gitignore, 산출 JSON만 커밋). 별 방향은 raDecToInertialDir → inertialDirToHorizontal → horizontalToScenePos 파이프라인 재사용. 별이 돔에 붙박이가 아니라 관성계 고정이므로 매 프레임 변환하면 9k×변환 비용 — Points 전체를 그룹 회전(자전 역행렬)으로 처리하는 게 효율적
+- 테스트 상태: 48 passed / 0 failed (상수 4 + 케플러 7 + 회합 3 + julian 4 + timeStore 5 + events 2 + civicTime 11 + skyCoords 8 + starDisk 4)
