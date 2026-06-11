@@ -7,14 +7,12 @@
 
 ## NOW (이번 세션 태스크 — 항상 1개)
 
-- [ ] **M1-4** 첫 배포 (M1 마감): `npm run build` 로컬 확인 → CLAUDE.md 규약대로 dev→main 머지 → `gh run watch` 성공 → `https://<owner>.github.io/teegarden-sim/` 접속해 System View 확인 → URL을 README.md 최상단에 기록 후 dev에 커밋
-  - DoD: 배포 링크에서 M1-3 화면이 보임
+- [ ] **M2-1** 시간 스토어+컨트롤러 (스펙 §3.2): simTimeJD, timeScale(1~1e6 로그), 재생/스크럽/이벤트 점프 버튼
+  - DoD: UI 동작 + JD↔표시시간 변환 테스트
 
 ## NEXT (위에서부터 순서대로 NOW로 승격)
 
 > 공통 규칙: **각 마일스톤 M{n}의 마지막 태스크에는 CLAUDE.md 'Git/배포 규약'의 dev→main 머지(=자동 배포)와 `gh run watch` 성공 확인까지 포함**된다.
-- [ ] **M2-1** 시간 스토어+컨트롤러 (스펙 §3.2): simTimeJD, timeScale(1~1e6 로그), 재생/스크럽/이벤트 점프 버튼
-  - DoD: UI 동작 + JD↔표시시간 변환 테스트
 - [ ] **M2-2** 시민시간 변환 모듈 (스펙 §5.2): JD → {week#, civicDay 1-5, civicTime}, 칭동 일출 = 주 시작 앵커
   - DoD: §10 테스트 7, 8 + 경계값 테스트
 - [ ] **M2-3** 시민 시계 HUD 위젯 (스펙 §5.3 + §7.6 시그니처 디자인): 원형 시계 + 칭동 고도 게이지 + 이벤트 카운트다운
@@ -41,7 +39,8 @@
 
 ## DONE
 
-- [x] **M1-3** System View 기본: SystemScene(항성+행성3+케플러 궤도선+OrbitControls, 반경 과장/True scale 토글) + §10 테스트 3·4 통과 (2026-06-11)
+- [x] **M1-4** 첫 배포 (M1 마감): dev→main 머지(release: M1, d2e3ac0) → Pages 수동 활성화 후 Actions 성공 → https://jinsoo-96.github.io/teegarden-sim/ 라이브 확인 → README에 URL 기록 (2026-06-11)
+- [x] **M1-3** System View 기본: SystemScene(항성+행성3+케플러 궤도선+OrbitControls, 반경 과장/True scale 토글) + §10 테스트 3·4 통과 (commit 9ca6f93, 2026-06-11)
 - [x] **M1-2** 케플러 엔진 `src/sim/kepler.ts`: solveKepler(NR, 1e-10) + propagate + librationOffsetRad. §10 테스트 1·7·8 통과 (commit e9e8715, 2026-06-11)
 - [x] **M1-1** 프로젝트 스캐폴드: Vite+React+TS + §7.1 스택 + vitest, 스펙 §2 → `src/data/teegarden.ts` 추출 생성, 상수 무결성 테스트 4개 통과 (commit 342dc31, 2026-06-11)
 - [x] **M0-1** GitHub 저장소·브랜치·배포 골격: git init → 초기 커밋 → `Jinsoo-96/teegarden-sim` public 생성 → main/dev 푸시 (initial commit, 2026-06-11)
@@ -58,11 +57,13 @@
 ## KNOWN ISSUES
 
 - deploy.yml의 paths 필터에 `.github/workflows/deploy.yml` 자신이 포함되어 있어, **deploy.yml을 추가/수정하는 main 푸시는 Actions를 발동시킴** (M0-1 초기 푸시에서 발동 → package.json 없어 즉시 실패 → 해당 런은 삭제 처리). M1-1 이후 package.json이 생기면 정상 동작하므로 구조 변경 불필요.
+- `configure-pages`의 `enablement: true`는 GITHUB_TOKEN 권한 부족으로 실패함("Resource not accessible by integration") → M1-4에서 `gh api repos/.../pages -X POST -f build_type=workflow`로 수동 활성화 완료. 이후 배포는 정상 — 재발 시 같은 명령 사용.
+- GitHub Actions Node 20 deprecation 경고 → M1-4에서 dev의 deploy.yml 액션 메이저 업그레이드(checkout/setup-node@v6, configure-pages@v6, upload-pages-artifact@v5, deploy-pages@v5). **main에는 M2 릴리스 때 반영됨** — 그 전까지 main 배포는 구버전으로 동작(2026-09-16까지는 문제없음).
 
 ## HANDOFF NOTE (마지막 세션이 덮어쓰는 인수인계 — 항상 최신 1개만)
 
-- 마지막 작업 파일/함수: `src/components/SystemScene.tsx` (Planet/OrbitLine/SystemScene) + `src/sim/synodic.test.ts`
-- 어디까지 했나: M1-3 완료 — System View 렌더(항성+행성3+궤도선+카메라+leva 토글), §10 테스트 3·4 통과, 빌드·dev 서버 정상
-- 다음 세션 첫 행동: M1-4 수행 — `npm test`/`npm run build` 확인 후 CLAUDE.md 규약대로 dev→main 머지(`release: M1`) → `gh run watch` 성공 확인 → 배포 URL 접속 확인 → README.md 최상단에 URL 기록 후 dev 커밋
-- 주의사항/함정: 배포는 main 푸시로만 발동. 빌드 시 "청크 >500kB" 경고는 three.js 번들 크기 안내(오류 아님, M6-3에서 처리). 시간 진행은 SystemScene 내 임시 클록(leva 일/초) — M2-1에서 zustand 스토어로 교체 예정
+- 마지막 작업 파일/함수: README.md(배포 URL), `.github/workflows/deploy.yml`(액션 메이저 업그레이드)
+- 어디까지 했나: **M1 마일스톤 완료** — https://jinsoo-96.github.io/teegarden-sim/ 라이브 (System View). main = release: M1 (d2e3ac0)
+- 다음 세션 첫 행동: M2-1 수행 — 스펙 §3.2 읽고 zustand 시간 스토어(simTimeJD, timeScale 1~1e6 로그, paused) + 재생/스크럽 UI 작성, SystemScene의 임시 leva 클록을 스토어로 교체, JD↔UTC 변환 테스트 작성
+- 주의사항/함정: SystemScene의 `daysPerSec` leva 컨트롤과 `SimClock` ref는 M2-1에서 제거 대상. JD↔UTC 변환은 JD 2440587.5 = 1970-01-01T00:00Z(Unix epoch) 기준이 간단. Pages 활성화는 이미 완료 상태이므로 건드릴 필요 없음
 - 테스트 상태: 14 passed / 0 failed (상수 4 + 케플러 7 + 회합주기 3)
