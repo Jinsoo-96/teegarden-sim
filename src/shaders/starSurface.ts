@@ -19,6 +19,8 @@ uniform float uLimbA;     // 0.9 [가정]
 uniform float uLimbB;     // -0.2 [가정]
 uniform float uRotPhase;  // 자전 위상 [rad] — 주기 97.56일
 uniform float uTime;      // 시뮬레이션 경과 [day] — granulation 진화
+uniform float uFlare;     // 플레어 강도 0–1 (§6.2)
+uniform vec3 uFlareDir;   // 플레어 핫스팟 방향 (뷰 좌표 — 지속 수 분이라 자전 무시 가능)
 
 float hash(vec2 p) {
   return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
@@ -81,8 +83,13 @@ void main() {
   sp = max(sp, 0.50 * spotMask(vb, vec3(0.95, 0.05, -0.30), cos(0.08)));
   I *= 1.0 - sp;
 
-  // 림 직전 미세 채층 가산 (디스크 안쪽 가장자리 붉은 기)
+  // 플레어 (§6.2): 디스크 전체 증광 + 국소 백청색(10,000K) 핫스팟
+  I *= 1.0 + 0.35 * uFlare;
   vec3 col = uColor * I + vec3(0.25, 0.06, 0.03) * smoothstep(0.92, 1.0, r);
+  if (uFlare > 0.001) {
+    float hs = smoothstep(cos(0.22), cos(0.05), dot(f, normalize(uFlareDir)));
+    col += vec3(0.82, 0.88, 1.0) * hs * uFlare * 1.6;
+  }
   gl_FragColor = vec4(col, 1.0);
 }
 `;

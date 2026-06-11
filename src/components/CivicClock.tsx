@@ -10,6 +10,7 @@ import {
   starAngularRadiusRad,
 } from "../sim/civicTime";
 import { nextOppositionJd } from "../sim/events";
+import { useFlareStore } from "../state/flareStore";
 import { useTimeStore } from "../state/timeStore";
 
 const [b, c, d] = PLANETS;
@@ -73,6 +74,16 @@ function useNextEvents(jd: number): EventCache {
     };
   }
   return cache.current as EventCache;
+}
+
+function FlareAlert() {
+  const active = useFlareStore((s) => s.active);
+  if (!active) return null;
+  return (
+    <div style={{ color: "#9fc4ff", fontWeight: 600 }}>
+      ⚡ 플레어 경보 — {active.energyErg.toExponential(1)} erg
+    </div>
+  );
 }
 
 function CountRow({ label, days }: { label: string; days: number }) {
@@ -176,10 +187,11 @@ export default function CivicClock() {
         ))}
       </div>
 
-      {/* 다음 이벤트 카운트다운 (§5.3) — 플레어 경보는 M5-2 */}
+      {/* 다음 이벤트 카운트다운 (§5.3) — 플레어는 푸아송 랜덤이라 발생 시에만 경보 */}
       <CountRow label="칭동 일출" days={ev.sunrise - jd} />
       <CountRow label="c 충 (보름)" days={ev.cOpp - jd} />
       <CountRow label="d 충" days={ev.dOpp - jd} />
+      <FlareAlert />
       <div style={{ color: "#8a8f99", marginTop: 6 }}>
         칭동 고도 <span style={numStyle}>{(altRad * RAD2DEG).toFixed(2)}°</span>{" "}
         <span style={{ fontSize: "0.65rem" }}>[유도]</span>

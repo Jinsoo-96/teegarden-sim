@@ -11,6 +11,7 @@ import {
   starDirectionFromPlanet,
 } from "../sim/skyCoords";
 import { SKY_SCATTERING_FRAG, SKY_SCATTERING_VERT } from "../shaders/skyScattering";
+import { flareIntensity, useFlareStore } from "../state/flareStore";
 import { useSettingsStore } from "../state/settingsStore";
 import { useTimeStore } from "../state/timeStore";
 import { DOME_R } from "./SurfaceScene";
@@ -39,6 +40,8 @@ export default function SkyDome() {
       uDensity: { value: 1.0 },
       uSamples: { value: 8 },
       uExposure: { value: 2.2 },
+      uFlare: { value: 0 },
+      uFlareTempK: { value: STAR.flare.colorTempK },
     }),
     [],
   );
@@ -52,6 +55,7 @@ export default function SkyDome() {
     mat.current.uniforms.uSunDir.value = sunVec.set(x, y, z);
     mat.current.uniforms.uDensity.value = PRESETS[preset as keyof typeof PRESETS];
     mat.current.uniforms.uSamples.value = quality;
+    mat.current.uniforms.uFlare.value = flareIntensity(useFlareStore.getState().active, jd);
   });
 
   return (

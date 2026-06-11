@@ -19,6 +19,8 @@ uniform float uTeffK;    // 3034 [관측]
 uniform float uDensity;  // 대기 프리셋: 1bar=1.0 / 0.1bar=0.1 / 무대기=0.0 [가정]
 uniform int uSamples;    // 파장 샘플 수 4/8/16 (quality)
 uniform float uExposure;
+uniform float uFlare;     // 플레어 강도 0–1 — 10,000K 성분 가산 (§6.5-5)
+uniform float uFlareTempK;
 
 // 플랑크 분포 (정규화 무관 — 상대 분포만 사용). λ: nm
 float planck(float lambda, float T) {
@@ -57,7 +59,8 @@ void main() {
     if (i >= uSamples) break;
     float fi = (float(i) + 0.5) / float(uSamples);
     float lambda = mix(380.0, 780.0, fi);
-    float B = planck(lambda, uTeffK);
+    // 플레어 시 광원 스펙트럼에 10,000K 성분 가산 → 하늘이 푸른 기를 띰
+    float B = planck(lambda, uTeffK) + uFlare * 1.2 * planck(lambda, uFlareTempK);
     // 산란계수 (상대값): Rayleigh λ⁻⁴, Mie는 파장 의존 미약
     float bR = uDensity * 0.30 * pow(550.0 / lambda, 4.0);
     float bM = uDensity * 0.02;

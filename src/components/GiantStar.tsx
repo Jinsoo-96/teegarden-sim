@@ -2,7 +2,7 @@
 // 위치/각크기는 천구좌표·칭동(§4)에서, 표면은 starSurface 셰이더가 그림
 import { useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
-import { Color, type Mesh, type ShaderMaterial } from "three";
+import { Color, Vector3, type Mesh, type ShaderMaterial } from "three";
 import { EPOCH_JD, PLANETS, STAR } from "../data/teegarden";
 import { starAngularRadiusRad } from "../sim/civicTime";
 import {
@@ -11,6 +11,7 @@ import {
   starDirectionFromPlanet,
 } from "../sim/skyCoords";
 import { STAR_SURFACE_FRAG, STAR_SURFACE_VERT } from "../shaders/starSurface";
+import { flareIntensity, useFlareStore } from "../state/flareStore";
 import { useSettingsStore } from "../state/settingsStore";
 import { useTimeStore } from "../state/timeStore";
 import { DOME_R } from "./SurfaceScene";
@@ -29,6 +30,8 @@ export default function GiantStar() {
       uLimbB: { value: STAR.limbDarkening.b },
       uRotPhase: { value: 0 },
       uTime: { value: 0 },
+      uFlare: { value: 0 },
+      uFlareDir: { value: new Vector3(0, 0, 1) },
     }),
     [],
   );
@@ -47,6 +50,12 @@ export default function GiantStar() {
     mat.current.uniforms.uRotPhase.value =
       (((jd - EPOCH_JD) / STAR.rotationPeriodDays) % 1) * 2 * Math.PI;
     mat.current.uniforms.uTime.value = jd - EPOCH_JD;
+    // 플레어 (§6.2)
+    const flare = useFlareStore.getState().active;
+    mat.current.uniforms.uFlare.value = flareIntensity(flare, jd);
+    if (flare) {
+      (mat.current.uniforms.uFlareDir.value as Vector3).set(...flare.dirView);
+    }
   });
 
   return (
