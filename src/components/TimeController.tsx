@@ -1,10 +1,10 @@
-// HUD 시간 컨트롤러 — 스펙 §3.2
-// 표시 3중 병기 중 ①UTC ③궤도 위상 구현, ②시민시각은 M2-2에서 추가
+// HUD 시간 컨트롤러 — 스펙 §3.2: 시간 표시 3중 병기 ①UTC ②시민시각 ③궤도 위상
 import type { CSSProperties } from "react";
 import { EPOCH_JD, PLANETS } from "../data/teegarden";
 import { formatJdUtc } from "../sim/julian";
 import { meanAnomaly } from "../sim/kepler";
 import { nextOppositionJd } from "../sim/events";
+import { jdToCivic, formatCivic } from "../sim/civicTime";
 import { useTimeStore } from "../state/timeStore";
 
 const [b, c, d] = PLANETS;
@@ -54,8 +54,10 @@ export default function TimeController() {
       </span>
       <span style={numStyle}>{formatJdUtc(jd)}</span>
       <span>
+        시민시각 <span style={numStyle}>{formatCivic(jdToCivic(jd))}</span>
+      </span>
+      <span>
         b 위상 <span style={numStyle}>{phaseDeg.toFixed(1)}°</span>
-        <span style={{ color: "#8a8f99" }}> · 시민시각 (M2-2 예정)</span>
       </span>
 
       <label>

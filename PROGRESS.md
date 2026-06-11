@@ -7,14 +7,12 @@
 
 ## NOW (이번 세션 태스크 — 항상 1개)
 
-- [ ] **M2-2** 시민시간 변환 모듈 (스펙 §5.2): JD → {week#, civicDay 1-5, civicTime}, 칭동 일출 = 주 시작 앵커
-  - DoD: §10 테스트 7, 8 + 경계값 테스트
+- [ ] **M2-3** 시민 시계 HUD 위젯 (스펙 §5.3 + §7.6 시그니처 디자인): 원형 시계 + 칭동 고도 게이지 + 이벤트 카운트다운 — **M2 마감: dev→main 머지(release: M2) + `gh run watch` 성공 확인 포함**
+  - DoD: 시각 확인, 시간 가속 시 동기화
 
 ## NEXT (위에서부터 순서대로 NOW로 승격)
 
 > 공통 규칙: **각 마일스톤 M{n}의 마지막 태스크에는 CLAUDE.md 'Git/배포 규약'의 dev→main 머지(=자동 배포)와 `gh run watch` 성공 확인까지 포함**된다.
-- [ ] **M2-3** 시민 시계 HUD 위젯 (스펙 §5.3 + §7.6 시그니처 디자인): 원형 시계 + 칭동 고도 게이지 + 이벤트 카운트다운
-  - DoD: 시각 확인, 시간 가속 시 동기화
 - [ ] **M3-1** SurfaceScene 스캐폴드 + 천구좌표 유틸 `src/sim/skyCoords.ts`: 행성 지평좌표(고도/방위) ↔ 궤도면/RA·Dec 변환, 관측자(위도, 터미네이터 경도) 파라미터화
   - DoD: 좌표 변환 단위테스트 (항성 방향=수평선, 반항성=반대 수평선)
 - [ ] **M3-2** 거대 항성 디스크: §6.2 셰이더(limb darkening, granulation, 흑점) + §4 칭동 고도 반영
@@ -37,7 +35,8 @@
 
 ## DONE
 
-- [x] **M2-1** 시간 스토어+컨트롤러: zustand 스토어(§3.2 적분 공식) + HUD(재생/일시정지·로그 속도·스크럽·충 점프 버튼) + JD↔UTC 변환, 테스트 11건 추가 (2026-06-11)
+- [x] **M2-2** 시민시간 변환 모듈 `src/sim/civicTime.ts`: 칭동 일출 앵커(WEEK_ZERO_JD) + jdToCivic(week/civicDay/시분초) + HUD 시민시각 표시. §10 테스트 7·8 + 경계값 11건 (2026-06-11)
+- [x] **M2-1** 시간 스토어+컨트롤러: zustand 스토어(§3.2 적분 공식) + HUD(재생/일시정지·로그 속도·스크럽·충 점프 버튼) + JD↔UTC 변환, 테스트 11건 추가 (commit ffd6aad, 2026-06-11)
 - [x] **M1-4** 첫 배포 (M1 마감): dev→main 머지(release: M1, d2e3ac0) → Pages 수동 활성화 후 Actions 성공 → https://jinsoo-96.github.io/teegarden-sim/ 라이브 확인 → README에 URL 기록 (commit 3b22825, 2026-06-11)
 - [x] **M1-3** System View 기본: SystemScene(항성+행성3+케플러 궤도선+OrbitControls, 반경 과장/True scale 토글) + §10 테스트 3·4 통과 (commit 9ca6f93, 2026-06-11)
 - [x] **M1-2** 케플러 엔진 `src/sim/kepler.ts`: solveKepler(NR, 1e-10) + propagate + librationOffsetRad. §10 테스트 1·7·8 통과 (commit e9e8715, 2026-06-11)
@@ -52,6 +51,7 @@
 - `2026-06-11 M1-3: 행성 반경 배율 ×80 채택 — 스펙 §7.3 예시 ×400은 행성(0.017AU)이 과장 항성(×8=0.0045AU)보다 커져 부적절. True scale 토글은 leva 패널 제공`
 - `2026-06-11 M1-3: §10 테스트 3·4 회합주기는 연속 충 11회 간격의 평균으로 측정 — b의 e=0.03 중심차로 개별 간격이 ±0.1일 자연 요동(물리 현상)하므로 평균이 올바른 측정. 기준값·허용오차는 표 그대로`
 - `2026-06-11 M1-3: teegarden.ts에 UNITS(kmPerAU, starRadiusKm=83480, earthRadiusKm) 추가 — 불변 규칙 1에 따른 상수화 (R★ km값은 스펙 §1.1 출처)`
+- `2026-06-11 M2-2: 칭동 고도 부호 규약 — 저녁 터미네이터(기본 관측자) 고도 = +librationOffsetRad. 칭동 일출 = 고도가 +각반지름을 상향 통과(스펙 §5.2 "완전히 떠오르는 순간" 그대로). 아침 터미네이터는 부호 반전으로 M3-1에서 처리`
 
 ## KNOWN ISSUES
 
@@ -61,8 +61,8 @@
 
 ## HANDOFF NOTE (마지막 세션이 덮어쓰는 인수인계 — 항상 최신 1개만)
 
-- 마지막 작업 파일/함수: `src/state/timeStore.ts` + `src/components/TimeController.tsx` + `src/sim/julian.ts`/`events.ts`
-- 어디까지 했나: M2-1 완료 — zustand 시간 스토어(§3.2 적분식), HUD 컨트롤러(재생/속도 로그슬라이더/스크럽/다음 c·d 충 점프), SystemScene 임시 클록 제거
-- 다음 세션 첫 행동: M2-2 수행 — 스펙 §5.2 읽고 `src/sim/civicTime.ts` 작성: JD → {week#, civicDay 1–5, civicTime}, 주 시작 앵커 = 칭동 일출. §10 테스트 7·8 + 경계값 테스트
-- 주의사항/함정: 칭동 일출 앵커는 kepler.librationOffsetRad 활용(최대 고도 = 오프셋 최대 시점 근방). 시민시각 표시 자리는 TimeController에 "시민시각 (M2-2 예정)" 플레이스홀더로 잡아둠. CIVIC_TIME 상수(orbitHours/civicDaysPerOrbit/civicDayHours) 사용 — 재유도 금지
-- 테스트 상태: 25 passed / 0 failed (상수 4 + 케플러 7 + 회합주기 3 + julian 4 + timeStore 5 + events 2)
+- 마지막 작업 파일/함수: `src/sim/civicTime.ts` (findLibrationSunrise / WEEK_ZERO_JD / jdToCivic / formatCivic)
+- 어디까지 했나: M2-2 완료 — 시민시간 변환 모듈 + TimeController에 시민시각 표시(3중 병기 완성), §10 테스트 7·8 + 경계값 통과
+- 다음 세션 첫 행동: M2-3 수행 — 스펙 §5.3 + §7.6 읽고 시민 시계 원형 위젯(SVG 권장): 24시민시 원형 다이얼 + 칭동 고도 게이지 링 + 주간 5칸 진행 바 + 이벤트 카운트다운(칭동 일출/c 충/d 충 — civicTime.findLibrationSunrise·events.nextOppositionJd 재사용). **M2 마지막 태스크이므로 완료 후 dev→main 머지(release: M2) + gh run watch 확인까지**
+- 주의사항/함정: 칭동 고도는 civicTime.librationAltitudeRad(jd), 각반지름은 starAngularRadiusRad(jd) 사용. 게이지 범위 ±3.44°(±0.06 rad). main 머지 시 deploy.yml 액션 업그레이드가 함께 반영됨(KNOWN ISSUES 참조)
+- 테스트 상태: 36 passed / 0 failed (상수 4 + 케플러 7 + 회합 3 + julian 4 + timeStore 5 + events 2 + civicTime 11)
